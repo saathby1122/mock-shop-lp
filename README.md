@@ -12,8 +12,9 @@ export. Plain HTML, CSS and vanilla JavaScript, no build step, hosted on GitHub 
 
 | Path | What it is |
 | --- | --- |
-| `index.html`, `styles.css`, `main.js` | The page |
+| `index.html`, `styles.css`, `main.js`, `favicon.svg` | The page |
 | `assets/img/` | Imagery cut from the Figma export (1x) plus product grids built from live store data |
+| `img/` | Re-cropped Build / Test / Launch preview panels used by the page (see `TODO.md`) |
 | `assets/icons/` | SVG icons shared with the production landing page |
 | `reference/` | Mockup frames and `stores.json` (data behind the Start pills) |
 | `builds/` | The three candidate implementations the final page was chosen from (kept for reference) |

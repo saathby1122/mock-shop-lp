@@ -133,6 +133,7 @@
     wells.forEach(function (well) {
       var code = $('[data-snippet]', well);
       if (code) code.textContent = SNIPPETS[key];
+      well.setAttribute('data-snippet-key', key);
     });
   }
 
@@ -153,39 +154,72 @@
     return legacyCopy(text);
   }
 
+  function focusQuietly(el) {
+    if (!el || !el.focus) return;
+    try { el.focus({ preventScroll: true }); } catch (err) { el.focus(); }
+  }
+
   function legacyCopy(text) {
     return new Promise(function (resolve, reject) {
+      var prev = document.activeElement;
       var ta = document.createElement('textarea');
       ta.value = text;
       ta.setAttribute('readonly', '');
-      ta.style.cssText = 'position:fixed;top:-1000px;left:-1000px;opacity:0;';
+      ta.setAttribute('aria-hidden', 'true');
+      ta.tabIndex = -1;
+      ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;padding:0;border:0;opacity:0;';
       document.body.appendChild(ta);
-      ta.select();
+      // focus + setSelectionRange rather than select(): select() can scroll iOS to the textarea
+      focusQuietly(ta);
+      ta.setSelectionRange(0, text.length);
       var ok = false;
       try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
       document.body.removeChild(ta);
+      // the textarea took focus; hand it back so keyboard and screen-reader users keep their place
+      if (prev && prev !== document.body) focusQuietly(prev);
       ok ? resolve() : reject(new Error('copy failed'));
     });
   }
 
   $$('[data-copy]').forEach(function (btn) {
     var label = $('[data-copy-label]', btn);
+    var well = btn.closest('[data-well]');
+    var status = well && $('[data-copy-status]', well); // role=status: a name change on the focused button is not announced
+    var code = well && $('[data-snippet]', well);
     var timer = null;
+
+    function announce(msg) {
+      if (!status) return;
+      status.textContent = '';
+      setTimeout(function () { status.textContent = msg; }, 50); // clear first so a repeated message is re-announced
+    }
+    function reset() {
+      if (label) label.textContent = 'Copy';
+      btn.classList.remove('is-copied');
+      btn.setAttribute('aria-label', 'Copy to clipboard');
+      if (status) status.textContent = '';
+    }
+
     btn.addEventListener('click', function () {
+      clearTimeout(timer);
       copyText(SNIPPETS[currentSnippet]).then(function () {
-        if (!label) return;
-        label.textContent = 'Copied';
+        if (label) label.textContent = 'Copied';
         btn.classList.add('is-copied');
         btn.setAttribute('aria-label', 'Copied to clipboard');
-        clearTimeout(timer);
-        timer = setTimeout(function () {
-          label.textContent = 'Copy';
-          btn.classList.remove('is-copied');
-          btn.setAttribute('aria-label', 'Copy to clipboard');
-        }, 1500);
+        announce('Copied to clipboard');
+        timer = setTimeout(reset, 1500);
       }).catch(function () {
-        if (!label) return;
-        label.textContent = 'Copy';
+        reset();
+        announce('Copy failed. Select the text and press Ctrl/Cmd+C');
+        // leave the snippet selected so a manual copy is one keystroke away
+        try {
+          if (code && window.getSelection) {
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.selectAllChildren(code);
+          }
+        } catch (err) { /* selection is best-effort */ }
+        timer = setTimeout(function () { if (status) status.textContent = ''; }, 4000);
       });
     });
   });
@@ -258,18 +292,21 @@
   }
 
   /* ------------------------------------------------ storefront preview frame */
+  // Static captures by default (faithful to the design): the frame holds both the desktop and the
+  // phone capture, and the toggle crossfades them while the frame itself animates (styles.css), so
+  // neither capture ever scales. The live store is only requested when the frame carries
+  // data-live="true": the iframe is then created lazily near the viewport, kept underneath the
+  // captures until its load event and faded in. With data-live="false" nothing third-party is
+  // fetched and the frame has no extra tab stop.
 
   var frame = $('.store-frame');
-  var iframe = frame && $('.store-frame__iframe', frame);
-  var fallback = frame && $('.store-frame__fallback', frame);
-  // `?noframe` / `#noframe` keeps the live store from loading (used for static screenshots/tests).
-  var noFrame = /(^|[?&#])noframe(=|&|$)/.test(location.search + location.hash);
+  var frameImgs = frame ? $$('.store-frame__img', frame) : [];
+  var deviceBtns = $$('.device-btn');
 
-  if (iframe && !noFrame && iframe.getAttribute('data-src')) {
-    iframe.addEventListener('load', function () {
-      if (iframe.getAttribute('src')) frame.classList.add('is-loaded');
-    });
-    iframe.src = iframe.getAttribute('data-src');
+  function preload(src) {
+    if (!src) return;
+    var img = new Image();
+    img.src = src;
   }
 
   function setDevice(device) {
@@ -277,23 +314,94 @@
     var mobile = device === 'mobile';
     frame.classList.toggle('is-mobile', mobile);
     frame.setAttribute('data-device', mobile ? 'mobile' : 'desktop');
-    $$('.device-btn').forEach(function (b) {
+    deviceBtns.forEach(function (b) {
       b.setAttribute('aria-pressed', b.getAttribute('data-device') === device ? 'true' : 'false');
     });
-    if (fallback) {
-      var src = fallback.getAttribute(mobile ? 'data-fallback-mobile' : 'data-fallback-desktop');
-      if (src && fallback.getAttribute('src') !== src) {
-        // If the mobile capture is missing, keep showing the desktop image.
-        var probe = new Image();
-        probe.onload = function () { fallback.src = src; };
-        probe.onerror = function () { if (!mobile) fallback.src = src; };
-        probe.src = src;
-      }
+    frameImgs.forEach(function (img) {
+      // Only the visible capture stays in the accessibility tree (none once the live store is showing: its
+      // iframe title names the storefront).
+      if (img.getAttribute('data-device') === device && !frame.classList.contains('is-loaded')) img.removeAttribute('aria-hidden');
+      else img.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  deviceBtns.forEach(function (b) {
+    b.addEventListener('click', function () { setDevice(b.getAttribute('data-device')); });
+  });
+
+  // Phones: the 1260px desktop screenshot is illegible at ~350px wide, so show the phone capture there
+  // (styles.css hides the toggle at that width; this also catches a window resized down to phone width).
+  var phoneQuery = window.matchMedia ? window.matchMedia('(max-width: 639px)') : null;
+  if (frame && phoneQuery) {
+    if (phoneQuery.matches) setDevice('mobile');
+    if (phoneQuery.addEventListener) phoneQuery.addEventListener('change', function (e) { if (e.matches) setDevice('mobile'); });
+  }
+
+  var LIVE_SRC = (frame && frame.getAttribute('data-live-src')) || 'https://apparel-streetwear.hydrogen.mock.shop/';
+  var LIVE_REVEAL_TIMEOUT = 8000;
+
+  function mountLiveFrame() {
+    if (!frame || frame.getAttribute('data-live') !== 'true' || $('.store-frame__iframe', frame)) return;
+    var ifr = document.createElement('iframe');
+    ifr.className = 'store-frame__iframe';
+    ifr.title = frame.getAttribute('data-live-title') || 'Storefront preview';
+    // Out of the tab order and the accessibility tree until the store has actually rendered (styles.css also
+    // keeps it out of hit-testing until then).
+    ifr.setAttribute('aria-hidden', 'true');
+    ifr.tabIndex = -1;
+    // The store keeps its scripts, cookies and forms, but cannot navigate this page away (no allow-top-navigation).
+    ifr.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox');
+    ifr.referrerPolicy = 'strict-origin-when-cross-origin';
+    var expired = false;
+    var expiry = setTimeout(function () { expired = true; }, LIVE_REVEAL_TIMEOUT);
+    ifr.addEventListener('load', function () {
+      clearTimeout(expiry);
+      // Reveal only a real document that arrived in time: a stalled store keeps the design capture
+      // instead of swapping it for a half-rendered page.
+      if (expired || !ifr.getAttribute('src')) return;
+      frame.classList.add('is-loaded');
+      ifr.removeAttribute('aria-hidden');
+      ifr.removeAttribute('tabindex');
+      frameImgs.forEach(function (img) { img.setAttribute('aria-hidden', 'true'); }); // the iframe's title now names the storefront
+    });
+    ifr.src = LIVE_SRC;
+    frame.appendChild(ifr);
+  }
+
+  // Chrome navigates an unreachable iframe to its own error page and still fires `load`, which would fade a
+  // sad-face page in over the capture. An opaque no-cors fetch resolves whenever the host answers at all and
+  // rejects on network errors (offline, DNS, refused, corporate block), so only mount when it resolves.
+  // X-Frame-Options / CSP frame-ancestors refusals cannot be detected from here (noted in TODO.md).
+  function mountLiveFrameIfReachable() {
+    if (!window.fetch) { mountLiveFrame(); return; }
+    fetch(LIVE_SRC, { mode: 'no-cors', cache: 'no-store' }).then(mountLiveFrame, function () { /* keep the static capture */ });
+  }
+
+  if (frame && frame.getAttribute('data-live') === 'true') {
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        if (entries.some(function (e) { return e.isIntersecting; })) {
+          io.disconnect();
+          mountLiveFrameIfReachable();
+        }
+      }, { rootMargin: '400px 0px' });
+      io.observe(frame);
+    } else {
+      mountLiveFrameIfReachable();
     }
   }
 
-  $$('.device-btn').forEach(function (b) {
-    b.addEventListener('click', function () { setDevice(b.getAttribute('data-device')); });
+  /* ------------------------------------------------------- image warming */
+
+  // Warm the other three catalog grids after load so the first Start pill switch does not flash.
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      var current = mainCard && $('[data-field="grid"]', mainCard);
+      var shown = current ? current.getAttribute('src') : '';
+      Object.keys(STORES).forEach(function (k) {
+        if (STORES[k].grid !== shown) preload(STORES[k].grid);
+      });
+    }, 1000);
   });
 
   /* ------------------------------------------------------------------- FAQ */

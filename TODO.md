@@ -34,6 +34,21 @@ Everything below was decided by the implementer, not by the design. Replace or c
 - **Mobile landing page** — the export only had the desktop frame (the "Mobile – One page" files are checkout
   mockups). The responsive behaviour below 1280px is an adaptation, to be replaced when the mobile design lands.
 
+## Deliberate deviations from SPEC.md (the mockup pixels won over the spec numbers)
+- Display headings render at Inter weight 340 with eased tracking (-0.021em / -0.010em) instead of 400 / -0.03em:
+  at 400 every heading carried about 18% more ink than the comp while body text matched. The store-card title is
+  500 rather than 600 and the nav brand is 14px. Ink widths land within 1 to 3px of the mockup.
+- Panels and terminals are 496px tall (mock rows 1128 to 1623), not 488; the terminal header is 38px plus a 1px rule.
+- The three big blocks use 48px top radii (the mock's curve fits 48, the spec said 44).
+- The CLI snippet renders at 13px mono so the 54-column command stays on one line beside the Copy button; the
+  clipboard still receives the plain command. Below 640px every snippet soft-wraps at 14px.
+- The 1260px container needs a 1356px viewport; between 1280 and 1355 the side margins stay 48px, because a 1260
+  container at 1280 would leave 10px margins.
+- The Build / Test / Launch panels use `img/panel-*.webp` (898 x 494 re-crops that run flush to the panel's bottom
+  border like the mock) instead of the 898 x 487 crops in `assets/img`. `favicon.svg` is the bag mark with a
+  color-scheme-aware fill. Terminal bullets drop to 11.5px only at 1024 to 1279px where the terminal is 320px wide.
+- On phones (under 640px) the storefront frame starts in the mobile state and the device toggle is hidden.
+
 ## Infrastructure
 - Fonts load from Google Fonts (Inter with the optical-size axis, JetBrains Mono). Self-host if the page must
   work offline or without third-party requests.

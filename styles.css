@@ -1,0 +1,828 @@
+/* mock.shop landing page — desktop-first, measured against reference/mockup-desktop.png at 1440 */
+
+:root {
+  --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --bg: #080b0c;
+  --black: #000000;
+  --footer-bg: #02090a;
+  --store-bg: #141a1a;
+
+  --text: #ffffff;
+  --muted: #b3b3b3;
+  --footer-link: #a1a1aa;
+  --accent: #00f4b9;
+
+  --hair-20: rgba(255, 255, 255, .2);
+  --pill-border: rgba(255, 255, 255, .22);
+
+  --panel: #171717;
+  --panel-border: #333333; /* rgba(255,255,255,.12) over --panel; the mock draws it flat */
+  --term-body: #304b4f;
+  --term-dark: #24393d;
+  --term-border: #356369;
+  --term-dot: #131e20;
+  --term-title: #a8e1ea;
+  --well-bg: #141719;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img, svg { display: block; }
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: none; }
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -100px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: #fff;
+  color: #000;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip-link:focus { top: 16px; }
+main:focus { outline: none; } /* the skip link's target (tabindex=-1) gets focus, not a ring */
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+  white-space: nowrap; border: 0;
+}
+
+.container {
+  width: min(1260px, 100% - 96px);
+  margin-inline: auto;
+}
+
+.h2 {
+  /* the comp's display faces are lighter than Regular (4px stems at 64px where 400 draws 5px): 340 puts the ink mass
+     within 2% of the mock, and the tracking is eased so the ink widths still land on the mock's (START title 781/784) */
+  font-weight: 340;
+  font-size: 56px;
+  line-height: 62px;
+  letter-spacing: -.010em;
+  color: var(--text);
+  margin: 0;
+}
+
+/* ---------- header / nav (over the hero) ---------- */
+
+.site-header {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 72px;
+  z-index: 10;
+}
+.site-nav {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 24px;
+}
+.brand__mark { width: 21px; height: 24px; color: #fff; }
+.docs-link {
+  color: #fff;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  position: relative;
+  height: 790px;
+  padding-top: 218px;
+  background: var(--bg) url("assets/img/hero-bg.webp") center / cover no-repeat;
+  text-align: center;
+  overflow: hidden;
+}
+.hero__title {
+  margin: 0;
+  font-weight: 340; /* see .h2 */
+  font-size: 64px;
+  line-height: 1.08;
+  letter-spacing: -.021em;
+  color: #fff;
+}
+.hero__sub {
+  max-width: 740px;
+  margin: 16px auto 0;
+  font-size: 18px;
+  line-height: 25px;
+  color: var(--muted);
+}
+
+/* tabs + code well (shared by hero and CTA) */
+
+.tabs {
+  display: inline-flex;
+  margin-top: 39px;
+  vertical-align: top;
+}
+.tab {
+  margin: 0;
+  padding: 0 16px 5px;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid var(--hair-20);
+  color: #b5b6b6;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  transition: color .15s, border-color .15s;
+}
+.tab:hover { color: #fff; }
+.tab[aria-selected="true"] { color: #fff; border-bottom-color: #fff; }
+
+.well {
+  position: relative;
+  width: min(544px, 100%);
+  min-height: 64px;
+  margin: 16px auto 0;
+  padding: 0 112px 0 14px;
+  display: flex;
+  align-items: center;
+  background: var(--well-bg);
+  border: 1px solid rgba(0, 244, 185, .3);
+  border-radius: 10px;
+  text-align: left;
+}
+.well__code {
+  margin: 0;
+  padding: 0 0 4px;
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: #fff;
+  white-space: pre; /* snippets are one or two fixed lines; never soft-wrap them at desktop widths */
+}
+/* the CLI one-liner is 54 columns: 454px at 14px, wider than the well's 418px text column (544 - 14 - 112). The spec
+   keeps single-line snippets on one line, so this snippet alone renders at 13px with slightly tighter tracking
+   (54 x (7.8 - .13) ~ 414px); the clipboard still gets the plain command from main.js */
+.well[data-snippet-key="cli"] .well__code { font-size: 13px; letter-spacing: -.01em; }
+.copy-btn {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 101px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #fff;
+  color: #000;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1;
+  transition: background .15s;
+}
+.copy-btn:hover { background: #ededed; }
+.copy-btn .icon-copy,
+.copy-btn .icon-check { width: 20px; height: 20px; }
+.copy-btn .icon-check { display: none; }
+/* "Copied" swaps the glyph for a check mark instead of dropping the icon, so the label does not jump in the pill */
+.copy-btn.is-copied .icon-copy { display: none; }
+.copy-btn.is-copied .icon-check { display: block; }
+
+/* ---------- feature sections (black block) ---------- */
+
+.features {
+  background: var(--black);
+  border-radius: 48px 48px 0 0; /* spec says 44; the mock's corner curve fits r~48 on all three blocks */
+  padding: 78px 0 144px;
+}
+.feature + .feature { margin-top: 78px; }
+
+.eyebrow {
+  margin: 0 0 5px;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.feature--nopills .eyebrow { margin-bottom: 13px; }
+.feature .h2 { margin-bottom: 15px; }
+.lede {
+  margin: 0;
+  max-width: 900px;
+  font-size: 18px;
+  line-height: 25px;
+  color: var(--muted);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+.pill {
+  height: 44px;
+  padding: 0 15px;
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid var(--pill-border);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.pill:hover { border-color: rgba(255, 255, 255, .45); }
+.pill[aria-selected="true"] { background: #fff; color: #000; border-color: #fff; }
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 352px;
+  gap: 8px;
+  margin-top: 40px;
+}
+
+.panel {
+  position: relative;
+  height: 496px;
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--panel) 0 74%, #0b0b0b 100%);
+}
+.panel__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+@media (min-width: 1356px) {
+  /* img/panel-*.webp are 898x494 re-crops of the mock's panel interior: 1:1 at the mocked width, flush to the border */
+  .panel__img { object-fit: none; object-position: 50% 0; }
+}
+
+/* store card (START panel) */
+
+.store-card {
+  position: absolute;
+  left: 50%;
+  top: 97px;
+  transform: translateX(-50%);
+  width: 747px;
+  padding: 10px 9px;
+  display: flex;
+  gap: 18px;
+  background: #fff;
+  color: #000;
+  border-radius: 10px;
+  z-index: 3;
+}
+@media (min-width: 1356px) {
+  /* (898 - 747) / 2 = 75.5 would render the card's vertical edges as a half-tone column; the mock's edge is a crisp step */
+  .store-card--main { left: 75px; transform: none; }
+}
+.store-card__grid {
+  flex: none;
+  width: 288px;
+  height: 167px;
+  border-radius: 4px;
+  object-fit: fill;
+}
+.store-card__body { min-width: 0; padding: 3px 8px 0 0; }
+.store-card__name {
+  margin: 0;
+  font-weight: 500; /* the comp's title is a Medium: 600 has ~20% more ink at the same 177px width */
+  font-size: 23px;
+  line-height: 28px;
+  letter-spacing: -.005em;
+  color: #000;
+}
+.store-card__host {
+  margin: 2px 0 0;
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 20px;
+  color: #6e7679;
+}
+.store-card__desc {
+  margin: 8px 0 0;
+  font-size: 16px;
+  line-height: 23.5px;
+  letter-spacing: .0125em; /* export renders ~2.5% wider than Google Inter */
+  color: #666;
+}
+.store-card__stats {
+  margin: 15px 0 0;
+  font-size: 13px;
+  line-height: 16px;
+  color: #666;
+}
+.store-card__stats b { font-weight: 600; color: #000; }
+.store-card__dot { margin: 0 1px 0 0; color: #999; } /* mock: a light dot at x 552-553, "96" starting at 561 */
+
+.store-card--ghost {
+  pointer-events: none;
+  user-select: none;
+  transform-origin: top center;
+}
+.store-card--2 {
+  top: 175px;
+  padding-bottom: 22px;
+  transform: translateX(-50%) scale(.875);
+  filter: blur(1.5px);
+  /* a grey card at the spec's .75 reads as the mock's ~#999 tone over the panel, and card 3 barely shows through it */
+  background: #c4c4c4;
+  opacity: .75;
+  z-index: 2;
+}
+/* card 2 shows a different catalog: four pairs of dark work trousers built from cells of the streetwear grid */
+.store-card__grid--tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 3px;
+  background: inherit;
+  overflow: hidden;
+}
+.store-card__grid--tiles i {
+  display: block;
+  background: url("assets/img/grid-streetwear.webp") 0 0 / 288px 167px no-repeat;
+  /* the mock's thumbnails are dark pants on light grey (row tones: mean ~70, spread ~34 after the card's blur);
+     the source cells are flatter, so lift them and push the contrast */
+  filter: brightness(1.15) contrast(1.5) saturate(.5);
+}
+.store-card__grid--tiles i:nth-child(2) { background-position: -73px 0; }
+.store-card__grid--tiles i:nth-child(3) { background-position: -146px 0; }
+.store-card__grid--tiles i:nth-child(4) { background-position: -219px 0; }
+.store-card__grid--tiles i:nth-child(5) { background-position: 0 -85px; }
+.store-card__grid--tiles i:nth-child(6) { background-position: -73px -85px; }
+.store-card__grid--tiles i:nth-child(7) { background-position: -73px -85px; }
+.store-card__grid--tiles i:nth-child(8) { background-position: 0 -85px; }
+.store-card--3 {
+  top: 249px;
+  transform: translateX(-50%) scale(.795);
+  filter: blur(4px);
+  opacity: .25;
+  z-index: 1;
+}
+.store-card--3 .store-card__grid { filter: brightness(.4); }
+/* only card 3's grid and stats row peek out below card 2; its other text would otherwise bleed through card 2 */
+.store-card--3 .store-card__name,
+.store-card--3 .store-card__host,
+.store-card--3 .store-card__desc { visibility: hidden; }
+.store-card--2 .store-card__grid { width: 280px; }
+.store-card--2 .store-card__body { padding-left: 22px; }
+.store-card--2 .store-card__host { color: #8a8f91; }
+.store-card--2 .store-card__desc,
+.store-card--2 .store-card__stats { color: #505050; }
+.store-card--2 .store-card__stats b { color: #232323; }
+@media (min-width: 1024px) {
+  /* the part of card 3 that lies behind card 2 would lift card 2's tone through its .75 opacity: clip it (local px, before the .795 scale) */
+  .store-card--3 { clip-path: inset(123px 0 0 0); }
+}
+
+/* terminal */
+
+.terminal {
+  display: flex;
+  flex-direction: column;
+  height: 496px;
+  background: var(--term-body);
+  border: 1px solid var(--term-border);
+  border-radius: 16px;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  color: #fff;
+}
+.terminal__head {
+  position: relative;
+  flex: none;
+  height: 39px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--term-dark);
+  border-bottom: 1px solid var(--term-border);
+  color: var(--term-title);
+  font-size: 15px;
+  line-height: 1;
+}
+.terminal__dots {
+  position: absolute;
+  left: 20px;
+  top: 13px;
+  display: flex;
+  gap: 9px;
+}
+.terminal__dots i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--term-dot);
+}
+.terminal__body { padding: 11px 10px 14px; } /* bubbles start on the mock's row (1179 / 2013 / 3536) */
+.terminal__prompt {
+  display: flex;
+  align-items: stretch; /* text top-aligned (the one-line Launch prompt sits at the top of its 39px bubble), icon bottom-right */
+  gap: 7px;
+  margin: 0;
+  min-height: 39px; /* the mock's one-line bubble (Launch) is 39px, not 36 */
+  padding: 10px 11px 9px 9px;
+  background: var(--term-dark);
+  border-radius: 8px;
+}
+.terminal__prompt p { flex: 1 1 auto; min-width: 0; margin: 0; }
+.terminal__prompt .icon-copy {
+  flex: none;
+  align-self: flex-end;
+  width: 16px;
+  height: 16px;
+  margin-bottom: 1px;
+  color: var(--term-title);
+}
+.terminal__steps {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  color: var(--accent);
+  line-height: 21px;
+}
+.terminal__steps li { position: relative; padding-left: 14px; }
+.terminal__steps li::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.terminal__result { margin: 17px -3px 0 -1px; } /* 334px box: the mock's 3-line Build result needs 331px */
+.terminal__result a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ---------- storefront preview ---------- */
+
+.storefront {
+  background: var(--store-bg);
+  border-radius: 48px 48px 0 0; /* spec says 44; the mock's corner curve fits r~48 on all three blocks */
+  padding: 80px 0 44px;
+}
+.storefront__bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+.device-toggle {
+  grid-column: 2;
+  display: flex;
+  gap: 12px;
+}
+.device-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: #131313;
+  color: #fff;
+  border: 0;
+  border-radius: 50%;
+  transition: background .15s;
+}
+.device-btn svg { width: 20px; height: 20px; }
+.device-btn[aria-pressed="true"] { background: #2c3131; }
+.btn-start {
+  grid-column: 3;
+  justify-self: end;
+  height: 44px;
+  padding: 0 22px;
+  display: inline-flex;
+  align-items: center;
+  background: #fff;
+  color: #000;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .15s;
+}
+.btn-start:hover { background: #ededed; }
+
+/* The frame is only a clip window: the two captures inside keep their own size (the desktop one follows the
+   container width through container units, the phone one is 390px wide), so toggling animates the window and
+   crossfades the captures without either of them zooming. */
+.storefront > .container { container-type: inline-size; }
+.store-frame {
+  position: relative;
+  width: 1260px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1260 / 751; /* fallback where container units are unsupported */
+  height: calc(100cqw * 751 / 1260); /* 751px at the mocked width (rows 4273-5023), the capture's own height */
+  margin: 24px auto 0;
+  background: #2a2a29;
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
+  transition: width .2s ease, height .2s ease;
+}
+.store-frame__img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: auto;
+  object-fit: cover;
+  object-position: top center;
+  z-index: 1;
+  transition: opacity .2s ease;
+}
+.store-frame__img--desktop {
+  width: 100%;
+  width: 100cqw; /* the container's width, not the animating frame's */
+  aspect-ratio: 1260 / 751;
+}
+.store-frame__img--mobile {
+  width: min(390px, 100%);
+  aspect-ratio: 390 / 751;
+  opacity: 0;
+}
+.store-frame.is-mobile {
+  width: min(390px, 100%);
+  aspect-ratio: 390 / 751;
+  height: calc(min(390px, 100cqw) * 751 / 390); /* 751px too, so the CTA below does not move */
+}
+.store-frame.is-mobile .store-frame__img--desktop { opacity: 0; }
+.store-frame.is-mobile .store-frame__img--mobile { opacity: 1; }
+/* the faded-out capture is also out of hit-testing (otherwise the later, transparent phone capture catches clicks
+   and "save image" over the desktop one) */
+.store-frame:not(.is-mobile) .store-frame__img--mobile,
+.store-frame.is-mobile .store-frame__img--desktop { pointer-events: none; }
+.store-frame__iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  opacity: 0;
+  z-index: 2;
+  transition: opacity .4s ease;
+}
+/* until the store has rendered the iframe is not just transparent but out of hit-testing, the tab order and the
+   accessibility tree (a visibility:hidden iframe still loads and still fires `load`) */
+.store-frame:not(.is-loaded) .store-frame__iframe { pointer-events: none; visibility: hidden; }
+.store-frame.is-loaded .store-frame__iframe { opacity: 1; }
+
+/* ---------- CTA ---------- */
+
+.cta {
+  position: relative;
+  z-index: 1;
+  margin-top: -44px;
+  /* the storefront capture is 751 rows (mock rows 4273-5023); the panel's top edge takes the mock's 752nd row (5024)
+     rather than leaving a seam, and the extra 1px of padding keeps everything below on the mock's rows */
+  padding: 128px 0 63px;
+  background: var(--bg);
+  border-radius: 48px 48px 0 0; /* spec says 44; the mock's corner curve fits r~48 on all three blocks */
+  text-align: center;
+}
+.cta .tabs { margin-top: 38px; }
+
+/* ---------- FAQ ---------- */
+
+.faq { padding: 64px 0 128px; }
+.faq__title { margin-bottom: 23px; }
+.faq-item { border-bottom: 1px solid var(--hair-20); }
+.faq-item__q {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 124px;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 400;
+  font-size: 27px;
+  line-height: 1.2;
+  color: #fff;
+}
+.faq-item__q::-webkit-details-marker { display: none; }
+.faq-item__q::marker { content: ""; }
+.faq-item__icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: #000;
+  border-radius: 50%;
+}
+.faq-item__icon svg { width: 20px; height: 20px; transition: transform .25s ease; }
+.faq-item[open] .faq-item__icon svg { transform: rotate(45deg); }
+.faq-item__a {
+  max-width: 900px;
+  padding: 0 0 24px;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 25px;
+}
+.faq-item__a p { margin: 0; }
+.faq-item__a code {
+  font-family: var(--mono);
+  font-size: .9em;
+  color: #fff;
+  background: rgba(255, 255, 255, .08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+.faq-item__a a { color: #fff; }
+
+/* ---------- footer ---------- */
+
+.site-footer {
+  height: 201px;
+  display: flex;
+  align-items: center;
+  background: var(--footer-bg);
+}
+.site-footer__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.footer-logo { color: #fff; }
+.footer-logo svg { width: 36px; height: 41px; }
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px 41px;
+  font-size: 16px;
+  line-height: 20px;
+}
+.footer-links a { color: var(--footer-link); text-decoration: none; }
+.footer-links a:hover { color: #fff; }
+.locale {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: #fff;
+  font-size: 16px;
+  line-height: 20px;
+}
+.locale svg { width: 20px; height: 20px; }
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1355px) {
+  /* the 898x487 crops scale here: the panel keeps the design's 900:496 proportion as a minimum, a taller terminal
+     may stretch the grid row (and the panel with it), and the crop covers whatever height results */
+  .panel { width: 100%; height: auto; aspect-ratio: 900 / 496; align-self: stretch; } /* explicit on both axes: grid's `normal` start-aligns aspect-ratio items, and a stretched height alone would re-derive the width */
+  .panel--start { min-height: 420px; }
+  /* the card stack scales with the panel: 97 / 175 / 249 px of the 494px interior */
+  .store-card { top: 19.6%; }
+  .store-card--2 { top: 35.4%; }
+  .store-card--3 { top: 50.4%; }
+  .terminal { height: auto; min-height: 0; }
+  .panel__img { object-fit: cover; object-position: top center; }
+}
+
+@media (max-width: 1279px) {
+  .feature-grid { grid-template-columns: minmax(0, 1fr) 320px; }
+  .store-card { width: min(747px, calc(100% - 32px)); }
+  .store-card__grid { width: 230px; height: 131px; }
+  .store-card--2 .store-card__grid { width: 224px; }
+  .br-xl { display: none; }
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .terminal__steps { font-size: 11.5px; } /* "Checking stock: Slate sold out in XS to M" (41 columns) fits the 298px line of the 320px terminal */
+}
+@media (min-width: 640px) and (max-width: 1279px) {
+  .store-card__stats { white-space: nowrap; } /* one line in the two-column card (below 640 the card stacks and the row has the full width) */
+}
+@media (min-width: 640px) and (max-width: 679px) {
+  .store-card__stats { font-size: 12px; } /* the text column is 236-275px here, 1-2px short of the 13px row: shrink instead of wrapping "2 / collections" */
+}
+
+@media (max-width: 1023px) {
+  .br-lg { display: none; }
+  .hero { height: auto; min-height: 640px; padding: 150px 0 90px; }
+  .hero__title { font-size: 48px; }
+  .h2 { font-size: 40px; line-height: 1.1; }
+  .feature-grid { grid-template-columns: minmax(0, 1fr); }
+  .panel { height: auto; aspect-ratio: 900 / 496; }
+  .panel--start {
+    aspect-ratio: auto;
+    min-height: 360px;
+    padding: 40px 16px 150px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .store-card--main { position: relative; left: auto; top: auto; transform: none; width: min(747px, 100%); }
+  .store-card--ghost { transform-origin: bottom center; top: auto; }
+  .store-card--2 { bottom: 54px; }
+  .store-card--3 { bottom: 8px; }
+  .terminal { height: auto; min-height: 360px; }
+}
+
+@media (max-width: 639px) {
+  .container { width: calc(100% - 40px); }
+  .hero { padding: 120px 0 72px; min-height: 0; }
+  .hero__title { font-size: 40px; }
+  .h2 { font-size: 32px; }
+  .tabs { margin-top: 32px; }
+  .well { flex-direction: column; align-items: stretch; padding: 12px 14px 14px; }
+  .well__code { padding-top: 0; white-space: pre-wrap; overflow-wrap: break-word; }
+  .copy-btn { position: static; transform: none; align-self: flex-end; margin-top: 12px; }
+  .features { padding: 64px 0 96px; }
+  .feature + .feature { margin-top: 64px; }
+  .store-card { flex-direction: column; gap: 12px; padding: 8px; }
+  .store-card__grid, .store-card--2 .store-card__grid { width: 100%; height: auto; aspect-ratio: 285 / 162; }
+  .store-card__body, .store-card--2 .store-card__body { padding-top: 0; padding-left: 0; }
+  .panel--start { padding: 24px 12px 120px; }
+  .store-card--2 { bottom: 44px; filter: blur(3px); } /* the spec's blur; at 1.5px the peeking sentence reads */
+  .store-card--3 { bottom: 6px; }
+  /* the storefront screenshot is only ~71% of the crop's width: zoom so it fills the panel (the cropped edges are
+     plain gradient, plus the Launch globe) and give the panel a taller proportion */
+  .panel:not(.panel--start) { aspect-ratio: 4 / 3; }
+  .panel__img { width: 140%; margin-left: -20%; object-fit: cover; object-position: 50% 0; }
+  .well[data-snippet-key="cli"] .well__code { font-size: 14px; letter-spacing: 0; }
+  .terminal { min-height: 320px; }
+  .storefront { padding-top: 48px; }
+  .storefront__bar { grid-template-columns: auto 1fr; gap: 12px; }
+  .device-toggle { grid-column: 1; display: none; } /* phones show the phone capture (main.js); the desktop capture would be a 27% thumbnail */
+  .btn-start { grid-column: 2; }
+  .store-frame { border-radius: 12px 12px 0 0; }
+  .cta { padding: 96px 0 48px; }
+  .faq { padding: 48px 0 80px; }
+  .faq-item__q { font-size: 20px; min-height: 88px; gap: 16px; }
+  .faq-item__a { font-size: 16px; line-height: 24px; }
+  .site-footer { height: auto; padding: 40px 0; }
+  .site-footer__inner { flex-direction: column; align-items: flex-start; gap: 28px; }
+  .footer-links { justify-content: flex-start; gap: 14px 28px; }
+}
+
+@media (max-width: 379px) {
+  .btn-start { padding: 0 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
