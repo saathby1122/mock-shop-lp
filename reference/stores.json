@@ -1,0 +1,103 @@
+{
+  "streetwear": {
+    "subdomain": "apparel-streetwear",
+    "name": "VibePulse Studio",
+    "host": "apparel-streetwear.mock.shop",
+    "storefront": "https://apparel-streetwear.hydrogen.mock.shop/",
+    "products": 8,
+    "variants": 96,
+    "collections": 2,
+    "collectionTitles": [
+      "Concrete Core Essentials",
+      "Urban Utility Gear"
+    ],
+    "firstProducts": [
+      "Heavyweight Graphic Tee in Smoke Cotton",
+      "Heavyweight Cotton T-Shirt",
+      "Soft Grey Hoodie",
+      "Heavyweight Hoodie",
+      "Slate Gray Streetwear Pants",
+      "Oversized Cargo Pants",
+      "Oversized Fit Streetwear Jacket",
+      "Topo-Lined Canvas Utility Cap"
+    ],
+    "description": "Curated streetwear essentials featuring heavy textures, sharp graphics, and limited-edition seasonal drops."
+  },
+  "decor": {
+    "subdomain": "home-decor",
+    "name": "Havenly Nest",
+    "host": "home-decor.mock.shop",
+    "storefront": "https://home-decor.hydrogen.mock.shop/",
+    "products": 60,
+    "variants": 154,
+    "collections": 5,
+    "collectionTitles": [
+      "Sun-Drenched Living",
+      "Sculptural Surfaces",
+      "Reflective Spaces",
+      "Organized Calm",
+      "Ritual Illumination"
+    ],
+    "firstProducts": [
+      "Terracotta Throw Pillow",
+      "Textured Cushion Cover in Clay",
+      "Handcrafted Terracotta Cushion",
+      "Terracotta Throw Pillow",
+      "Terracotta Clay Cushion",
+      "Terracotta Throw Pillow",
+      "Burnt Terracotta Linen Throw",
+      "Luxurious Textured Throw Blanket"
+    ],
+    "description": "We offer a handpicked collection of sculptural decor, soft textiles, and artisanal accents to elevate your living space."
+  },
+  "beauty": {
+    "subdomain": "skincare",
+    "name": "Lumina Botanica",
+    "host": "skincare.mock.shop",
+    "storefront": "https://skincare.hydrogen.mock.shop/",
+    "products": 29,
+    "variants": 79,
+    "collections": 4,
+    "collectionTitles": [
+      "Daily Botanical Purification",
+      "Luminous Clinical Hydration",
+      "Targeted Botanical Restoration",
+      "Essential Protection Rituals"
+    ],
+    "firstProducts": [
+      "Botanical Cleanser in Clear Pump Bottle",
+      "Daily Renewal Cleanser With Salicylic Acid",
+      "Botanical renewal cleanser with green tea",
+      "Botanical Cleansing Toner",
+      "Soothing sage balancing toner",
+      "Calm Balance Mist Toner",
+      "Sage Leaf Toner",
+      "Renewal Moisturizer with Brightening Actives"
+    ],
+    "description": "We blend potent clinical actives with soothing plant extracts to create simple, effective daily skincare rituals."
+  },
+  "sports": {
+    "subdomain": "activewear-dropship",
+    "name": "VigorVibe Active",
+    "host": "activewear-dropship.mock.shop",
+    "storefront": "https://activewear-dropship.hydrogen.mock.shop/",
+    "products": 8,
+    "variants": 96,
+    "collections": 2,
+    "collectionTitles": [
+      "Kinetic Compression Series",
+      "Velocity Layering Essentials"
+    ],
+    "firstProducts": [
+      "Electric Blue Sports Bra",
+      "Cropped Sports Bra with Graffiti Print",
+      "Lime Green Athleisure Leggings",
+      "Fitted Leggings in Neon Lemon",
+      "Sunbeam Cropped Workout Hoodie",
+      "Mint Green Activewear Top",
+      "Violet Zip-Front Performance Jacket",
+      "Ergonomic Running Belt"
+    ],
+    "description": "High-performance activewear and sleek gear designed to help you crush your workout with confidence and vibrant flair."
+  }
+}
