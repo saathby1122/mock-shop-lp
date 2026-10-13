@@ -3,7 +3,7 @@
 Everything below was decided by the implementer, not by the design. Replace or confirm each item.
 
 ## Content the mockup did not define
-- **CLI and Skill tab snippets** — taken from the production landing page constants:
+- **CLI and Skill tab snippets** — taken from the in-progress mock.shop landing code (not yet shipped):
   `npm i -g @shopify/cli && shopify store create preview` and `npx skills add Shopify/shopify-ai-toolkit`.
 - **Start pills (Decor / Beauty / Sports)** — real mock.shop stores picked from the public directory search:
   Havenly Nest (home-decor), Lumina Botanica (skincare), VigorVibe Active (activewear-dropship).
@@ -13,13 +13,13 @@ Everything below was decided by the implementer, not by the design. Replace or c
   only swap the Agent transcript (written by the implementer). Previews for those styles are needed from design.
   Note: the mock's Build transcript describes a "sticker sheet / sunny yellow" look while the preview is the
   monochrome Technical store; kept exactly as designed.
-- **FAQ** — the mock shows five "Question" placeholders. Five of the eight questions from the production FAQ were
-  used; the catalog-choice answer was shortened. The three unused production questions: "Where can I find sample
+- **FAQ** — the mock shows five "Question" placeholders. Five of the eight questions drafted for the in-progress mock.shop landing
+  (not yet shipped) were used; the catalog-choice answer was shortened. The three unused draft questions: "Where can I find sample
   product data for an ecommerce store?", "Can I build a clothing store with size and color options?",
   "Is mock.shop a website builder?".
 - **Link targets** — Read the docs → https://mock.shop/guides/ · "this link" in the Launch terminal →
   https://www.shopify.com/ · Start with this store → https://apparel-streetwear.hydrogen.mock.shop/ ·
-  footer links → the production footer's Shopify legal URLs. The "USA | English" selector is decorative.
+  footer links → the Shopify legal URLs used by the in-progress landing footer. The "USA | English" selector is decorative.
 
 ## Assets
 - All imagery is cut from the 1x Figma export, so it is soft on retina screens. Export at 2x from Figma:
