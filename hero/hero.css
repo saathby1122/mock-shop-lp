@@ -22,8 +22,9 @@
      page's 790px desktop hero stays. On a phone (<=900px) the lab's box IS taken, under hero-on (see the 900px block).
    - Tokens: the lab's dark --panel (#13181a; the page's own --panel is #171717 and used below the hero) on the room
      only, its dark --scrim on the hero; the room's text left-aligned (the page's hero centres its text).
-   - The scrim is the <img class="hscrim"> in the markup (Rails: image_tag), hidden unless hero-on. No CSS url reference in
-     this file (the Rails landing-stylesheet test forbids them).
+   - The scrim is the <img class="hscrim"> in the markup, hidden unless hero-on; Rails inlines the SVG instead (its
+     static-assets test fails any pipeline SVG; HERO.md). No CSS url reference in this file (the Rails
+     landing-stylesheet test forbids them).
    - The beam rides this page's well, which has a real 1px border at radius 10 (the lab's ring is an ::after at radius
      16): the SVG goes -.5px out to the border's centre line (the markup's rx is 9.5) and sits at z-index:-1 in the
      isolated well, so it paints over the well's fill and border and under the snippet and the Copy button.

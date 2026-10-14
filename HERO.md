@@ -19,8 +19,8 @@ this page's own hero, with this page's own copy, layout, type, tabs and Copy but
    copy's parts then scale out of the vanishing point, and the headline condenses letter by letter out of up to 640
    canvas particles. It waits for the fonts, with a 1.5s fail-safe.
 3. **The beam** (`svg.hbeam` in the hero well): a thin teal light running round the well's ring, paused off screen.
-4. **The scrim** (`img.hscrim`) behind the copy, plus two CSS washes over the room (`.hero::after`, and a phone
-   fade band `.hero::before`).
+4. **The scrim** (`.hscrim`: an `<img>` here, an inline `<svg>` in Rails) behind the copy, plus two CSS washes over
+   the room (`.hero::after`, and a phone fade band `.hero::before`).
 
 With JS off, without module scripts, from `file://`, and whenever the field cannot run (hero/field.js missing,
 blocked, refused or unparsable, or throwing before it boots; three.js failing; a page without the hero's markup) the
@@ -30,12 +30,12 @@ hero is exactly the static picture it was (`assets/img/hero-bg.webp`).
 
 | Path | Origin | Size (gzip -9) |
 | --- | --- | --- |
-| `hero/hero.css` | hand-ported from the lab's `<style>` (lines 31-644); every block cites its upstream lines; PORT NOTES at the top | 17.3 KB (6.2 KB) |
+| `hero/hero.css` | hand-ported from the lab's `<style>` (lines 31-644); every block cites its upstream lines; PORT NOTES at the top | 17.4 KB (6.3 KB) |
 | `hero/intro.js` | **generated** from the lab's inline head script (lines 646-883), 8 edits | 19.9 KB (8.0 KB) |
 | `hero/field.js` | **generated** from the lab's module script (lines 1026-8152), 11 edits, RoomEnvironment inlined | 409 KB (140 KB) |
 | `hero/vendor/three.module.min.js` | the lab's vendored three.js r170, byte for byte (MIT) | 692 KB (171 KB) |
 | `hero/vendor/LICENSE.txt` | three.js's MIT licence (the lab's `vendor/LICENSE`, renamed so its type follows from its extension) | 1 KB |
-| `hero/scrim.svg` | the lab's `option-3/scrim.svg`, byte for byte | 674 B |
+| `hero/scrim.svg` | the lab's `option-3/scrim.svg`, byte for byte. Rails inlines it instead: the asset pipeline takes no SVG files (see "DOM contract") | 674 B |
 | `hero/products/00.webp` ... `88.webp` | the 89 product photos the module can ask for (no-WebGL path only), byte for byte | 1.65 MB, 87 KB max |
 | `tools/hero_port.py` | the generator (python3, stdlib only) | |
 | `index.html` | `<head>` links, the hero markup, the module script (below) | |
@@ -95,7 +95,7 @@ Why this order:
   `data-three` that differs from the preload's href loaded three.js twice). With JavaScript disabled, Chromium creates
   the preload request and blocks it at once (Playwright reports it failed with `csp`, Blink's script-disabled
   block): it never reaches the server, and JS off adds only `hero/hero.css` and `hero/scrim.svg` to the page's
-  requests (*measured*; other engines *unverified*).
+  requests (*measured*; other engines *unverified*). With the scrim inline, as in Rails, only `hero/hero.css`.
 - `hero.css` after the page's sheet. Its overrides mostly win by specificity (`.hero-on .hero` over `.hero`), but
   that is the order everything was tested in.
 
@@ -114,7 +114,9 @@ to keep the `Link` header to the llms-txt advertisement alone; the hero's tags n
       data: { hero_field: "" }, preload_links_header: false %>             <%# last in <body> %>
 ```
 
-The hand-written `<link rel="modulepreload">` stays as it is (no `crossorigin` attribute: see "CSP").
+The hand-written `<link rel="modulepreload">` stays as it is (no `crossorigin` attribute: see "CSP"). The landing's
+`root_test.rb` pins its tags (`link[rel='stylesheet']` and `script` count 1, `script` 2 with Dux, and no `style` or
+`[style]` at all), so the hero's stylesheet and two scripts need those counts raised.
 
 ## DOM contract
 
@@ -124,7 +126,7 @@ The hand-written `<link rel="modulepreload">` stays as it is (no `crossorigin` a
   <div class="rm" id="fl" aria-hidden="true"></div>          <!-- Rails: + data-three, data-products -->
   <div class="container hero__inner">
     <div class="hero__copy">
-      <img class="hscrim" src="hero/scrim.svg" width="1155" height="919" alt="">
+      <img class="hscrim" src="hero/scrim.svg" width="1155" height="919" alt="">   <!-- Rails: the inline <svg class="hscrim"> (below) -->
       <h1 class="hero__title" id="hero-title"><span>Sample Stores for</span> <span>Building With AI</span></h1>
       <p class="hero__sub">...</p>
       <div class="tabs" role="tablist" ...>...</div>
@@ -195,9 +197,44 @@ What each part requires (what breaks otherwise):
   a same-document reference, a presentation attribute and not CSS, so the filter id must stay unique on the page.
   intro.js finds it with `document.querySelector('.hbeam')` (one beam per page). In the Rails snippet partial, render
   it only when the partial's `id == "hero"`.
-- **The scrim** is the first child of `.hero__copy`, an `<img>` (Rails: `image_tag("hero/scrim.svg", class: "hscrim",
-  width: 1155, height: 919, alt: "")`). It is hidden unless `hero-on`, but as an `<img>` it is still fetched with
-  JS off (674 B).
+- **The scrim** is the first child of `.hero__copy`. On this site it is an `<img>` of `hero/scrim.svg`, hidden unless
+  `hero-on` but, as an `<img>`, still fetched with JS off (674 B). **In Rails it goes inline, not through
+  `image_tag`.** The landing branch (patch 1485, `saathvik/mock-shop-index-page`) stacks on #1484's static assets
+  (`saathvik/mock-shop-static-assets` @ 50500e88), whose `StaticAssetsTest` fails any SVG on the asset load path ("no
+  asset is an SVG, which the CDN would serve on mock.shop's own origin with no policy of its own"; its AGENTS.md note
+  says to keep SVG inline, as the landing's `_icon` partial does). An `app/assets/images/hero/scrim.svg` fails the
+  suite. Upstream's file cannot be pasted in as it is either. Its root's `style="display: block;"` is refused by any
+  `style-src` without `'unsafe-inline'`, the landing's included (*measured* under the policy in "CSP": one
+  `style-src-attr` violation more than the page's own two), and it fails `root_test.rb`'s
+  `assert_select("style, [style]", count: 0)`. Its group's `id="Ellipse 1"` is not a valid HTML id (it has a space).
+  Its filter id, `filter0_f_0_65`, is a Figma export's, and inline it joins the page's ids. Render this, on one line,
+  as the first child of `.hero__copy`:
+
+  ```html
+  <svg class="hscrim" preserveAspectRatio="none" overflow="visible" width="1155" height="919" viewBox="0 0 1155 919" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><g filter="url(#hscrim-blur)"><ellipse cx="577.5" cy="459.5" rx="377.5" ry="259.5" fill="#080B0C"/></g><defs><filter id="hscrim-blur" x="0" y="0" width="1155" height="919" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="100" result="effect1_foregroundBlur_0_65"/></filter></defs></svg>
+  ```
+
+  That is upstream's `scrim.svg` with three edits: the root's `style` dropped, the group's `id` dropped, and the
+  filter id renamed `hscrim-blur` (unique on the page, like the beam's `hbeam-g`). It also gains
+  `class="hscrim" aria-hidden="true" focusable="false"`, as the landing's icons have. Nothing else is needed:
+  landing.css's `img, svg { display: block; }` and hero.css's absolute positioning do what the dropped style did, and
+  hero.css's `.hero .hscrim` rules size, place and hide it as they do the `<img>`. *Measured* on a copy of this page
+  with that markup in place of the `<img>`:
+  - Held stills (`?lab&hold=8`) are identical to the `<img>`'s at 1440x790, dpr 1 and dpr 2 (0 px differ). At
+    390x844 mobile, dpr 3 (where hero.css scales the scrim to .62), 24 px are 1/255 off.
+  - Under the policy in "CSP" there are only the page's two pre-existing violations. With upstream's root style kept,
+    there is a third, on the scrim's line.
+  - The accessibility tree (236 nodes) and the 12 tab stops are unchanged.
+  - JS off, the page is byte-identical to the pristine one at 1440 and 390, and nothing is fetched for the scrim.
+  - Steady-state GPU raster time (per 4 s, 240 frames) is the `<img>`'s at 1440 dpr 1 (168-180 vs 170-176 ms, three
+    runs each) and 3-4% more at 1440 dpr 2 (169-170 vs 163-164 ms, two runs) and at 390 dpr 3 (182-188 vs 175-181
+    ms, four runs, plus one `<img>` run at 219; a raster `<img>` gave 178-190): at most ~0.03 ms a frame. The beam
+    repaints the well, over the scrim, every frame.
+
+  The inline copy costs 669 bytes of HTML (427 gzipped). Safari and Firefox are *unverified*. A raster (WebP) passes
+  the test too, but its pixels are not identical: 57-63% of the scrim's pixels are 1-2/255 off (3/255 for a
+  quarter-size render). It also weighs 8-55 KB (a quarter-size to a full-size render) where the SVG is 674 B, is
+  fetched with JS off as well, and takes a browser to regenerate.
 - **The module script carries `data-hero-field`**: intro.js's error listener finds field.js by it (Rails' digested
   name cannot be matched by path).
 - **Nothing hooks the page's ids or main.js's attributes** (`#well-hero`, `#tab-hero-*`, `data-tab`,
@@ -220,7 +257,7 @@ Classes and attributes the scripts set:
 
 Propshaft serves every asset under a digested name and only rewrites CSS `url()` and JS `RAILS_ASSET_URL()`. It
 does not rewrite module specifiers or `new URL(..., import.meta.url)`, and a precompiled app has no undigested copy
-(PLAN.md:112, 265). field.js's own fallbacks are `new URL('vendor/three.module.min.js', import.meta.url)` and
+(PLAN.md:32, 115). field.js's own fallbacks are `new URL('vendor/three.module.min.js', import.meta.url)` and
 `new URL('products/<id>.webp', import.meta.url)`, files next to field.js. They are right for this static site and
 would 404 in the app. So the page passes the URLs in, on `#fl`:
 
@@ -257,10 +294,11 @@ Run with the policy as a response header (`/tmp/hero-port/understand/tools/csp_c
   the field boots with all 17 models.
 
 So the hero needs `script-src` for intro.js, field.js and three.js (module import and modulepreload), `style-src` for
-hero.css, and `img-src` for scrim.svg and the photos. It needs **no** `'unsafe-inline'`, `'unsafe-eval'`, nonce,
-`connect-src`, `worker-src`, `blob:` or `data:`. The markup adds no `style=` attribute, inline script, importmap or
-`<style>`. A `script-src` that misses field.js's URL now gives the static picture back (intro.js's listener); one that
-misses three.js's did already (field.js's catch).
+hero.css, and `img-src` for the photos (and, on this site, scrim.svg; the Rails page inlines the scrim, which needs no
+source). It needs **no** `'unsafe-inline'`, `'unsafe-eval'`, nonce, `connect-src`, `worker-src`, `blob:` or `data:`.
+The markup adds no `style=` attribute, inline script, importmap or `<style>`. A `script-src` that misses field.js's
+URL now gives the static picture back (intro.js's listener); one that misses three.js's did already (field.js's
+catch).
 
 Notes for the app:
 - **CDN and CORS** (measured by the review): both production asset paths,
@@ -281,9 +319,12 @@ Notes for the app:
   section) and its six `@keyframes` names, which are document-global and upstream's: `hx-in`, `rm-in`, `hx-pt`,
   `hx-ch`, `hbeam-run`, `hbeam-in`. The static site defines no other keyframes; **grep the Rails landing CSS for those
   six names** before linking hero.css next to it.
-- `scrim.svg`'s root has `style="display: block;"` and a blur filter. An SVG loaded as an image is its own document,
-  outside the page's CSP, but PLAN.md asks for a review of pipeline SVGs (or a raster).
-- PLAN.md:105 wants a MIME type from every pipeline file's extension: hence `LICENSE.txt`.
+- **No SVG files in the pipeline.** #1484's `StaticAssetsTest` fails any `.svg` on the asset load path: a pipeline
+  file is served on mock.shop's own origin with no CSP of its own. So the scrim goes inline in the Rails markup (see
+  "DOM contract"), as the landing's icons do. On this static site `hero/scrim.svg` stays an `<img>`: an SVG loaded as
+  an image is its own document, with scripts off, and the policy above reports nothing for it (*measured*).
+- The same test wants a MIME type from every pipeline file's extension ("every asset has a MIME type, which the CDN
+  upload labels it with"): hence `LICENSE.txt`.
 
 ## Knobs (behind `?lab`)
 
@@ -302,7 +343,7 @@ and about fifty number knobs (`drift=`, `sz=`, `focus=`, ...; see the field's `n
 
 | Situation | What happens (measured unless noted) |
 | --- | --- |
-| JS off | today's static hero: screenshots byte-identical to the pristine site at 1920x1080, 1440x900, 1280x800, 1024x768, 960x800, 768x1024, 600x900, 412x915, 390x844, 375x667, 360x740 and 320x568 (phones mobile, dpr 3), and the whole page at 1440 and 390. It requests only `hero/hero.css` and `hero/scrim.svg` beyond the static page: Chromium blocks the three.js modulepreload with JS off (other engines *unverified*) |
+| JS off | today's static hero: screenshots byte-identical to the pristine site at 1920x1080, 1440x900, 1280x800, 1024x768, 960x800, 768x1024, 600x900, 412x915, 390x844, 375x667, 360x740 and 320x568 (phones mobile, dpr 3), and the whole page at 1440 and 390. It requests only `hero/hero.css` and `hero/scrim.svg` beyond the static page: Chromium blocks the three.js modulepreload with JS off (other engines *unverified*). With the scrim inline (the Rails markup) only `hero/hero.css`, and the shots are still byte-identical at 1440 and 390 (*measured* on a copy of this page) |
 | No module scripts / `file://` | `hero-on` is not set, so the static picture stays, with no beam or scrim; the intro still plays over it (*measured* from `file://`). Chrome logs its own CORS refusal of the module and the modulepreload there: 4 console errors the static page did not have |
 | hero/field.js fails: 404, network abort, refused by a CSP, refused by CORS, a parse error (a module-capable browser without top-level await: Chrome/Firefox <= 88, Safari <= 14), or a throw before it has booted | intro.js's capture-phase `error` listener (edit 6) takes `hero-on` off and sets `data-field="off"`. Measured for each of those (the throws: right after three.js loads, after the stream has started drawing, and inside a boot-time rAF callback): the static picture is back, identical to the pristine viewport at 1440 (0 px differ) and at 390 within the pristine page's own raster noise; no beam, scrim or washes; the intro completes (parts opaque, letters back to text, the H1's aria-label gone); no animation frames afterwards. The console has only the browser's own load error, or the simulated failure itself |
 | three.js fails (blocked, offline, CSP) | field.js's catch: `hero-on` comes off, the static picture returns (0 px differ at 1440), `data-field="off"`, no beam/scrim/washes, no uncaught error. The only console line is Chrome's own network error for the failed request |
@@ -319,10 +360,10 @@ and about fifty number knobs (`drift=`, `sz=`, `focus=`, ...; see the field's `n
 ## Budget (measured)
 
 - **Bytes:** the hero adds about **325 KB gzipped**: three.js 171 KB, field.js 140 KB, intro.js 8.0 KB, hero.css
-  6.2 KB, scrim 0.4 KB (1.14 MB uncompressed). With JS on, `hero-bg.webp` (26 KB) is no longer fetched. PLAN.md's
-  budget (~/mock-shop-work-items/PLAN.md, "Budget") has five lines; the hero keeps two (any single image <= 300 KB:
-  its largest is an 87 KB photo; fonts <= 110 KB: it adds none) and breaks three (same-origin bytes, text at gzip -9,
-  images raw, Google Fonts excluded; 1440x900 and 390x844 give the same set):
+  6.3 KB, scrim 0.4 KB (in Rails, inline in the HTML); 1.14 MB uncompressed. With JS on, `hero-bg.webp` (26 KB) is
+  no longer fetched. PLAN.md's budget (~/mock-shop-work-items/PLAN.md, "Budget") has five lines; the hero keeps two
+  (any single image <= 300 KB: its largest is an 87 KB photo; fonts <= 110 KB: it adds none) and breaks three
+  (same-origin bytes, text at gzip -9, images raw, Google Fonts excluded; 1440x900 and 390x844 give the same set):
   - **HTML+CSS+JS <= 40 KB compressed:** 21.6 KB -> **347 KB** (index.html 8.3 -> 9.0 KB). It cannot hold with the
     hero in it: keep three.js and the field outside that line or revise it.
   - **First view <= 450 KB:** 420 KB -> **720 KB** (+299 KB; 17 -> 21 requests: hero.css, intro.js, three.js,
@@ -371,7 +412,8 @@ python3 tools/hero_port.py /path/to/mock-shop-lp/project/hero-stage/hero-lab --c
   of string literals matched acorn's exactly on both outputs). A hit stops the script with the file, line and text.
 - **Not generated:** `hero/hero.css` (diff the lab's `<style>`, lines 31-644, by hand: the field, intro, letter,
   beam, scrim and wash rules) and the hero markup in `index.html` (the beam SVG is the lab's K916-933 with every
-  `rx` at 9.5; the ghost `<pre>`s are main.js's SNIPPETS, so change them together).
+  `rx` at 9.5; the ghost `<pre>`s are main.js's SNIPPETS, so change them together). Nor is the Rails partial's
+  inline scrim: if the pin stops on a changed `option-3/scrim.svg`, redo its three edits ("DOM contract") by hand.
 
 ## How to verify
 
