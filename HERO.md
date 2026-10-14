@@ -56,11 +56,13 @@ Static site (`index.html`):
   <link rel="stylesheet" href="hero/hero.css">
   <link rel="modulepreload" href="hero/vendor/three.module.min.js" fetchpriority="low">
   <script src="hero/intro.js"></script>
+  <script src="flow/head.js"></script>                <!-- the flow's (FLOW.md, "Load order") -->
 </head>
 <body>
-  ...
+  ...                                                 <!-- the flow's stylesheet, fonts link and section are in here -->
   <script src="main.js"></script>
   <script type="module" src="hero/field.js" data-hero-field async fetchpriority="low"></script>
+  <script async src="flow/flow.js" data-flow-script></script>   <!-- the flow's -->
 </body>
 ```
 
@@ -71,7 +73,8 @@ Why this order:
 - It comes **after the stylesheets**: a classic script waits for the stylesheets before it, so
   `document.fonts.load('340 64px Inter')` can match the font's `@font-face`. Placed before the font stylesheet it
   matches nothing, and the entrance would run on fallback metrics (measured by the head analysis: 0 faces vs 1).
-- `field.js` is an **async** module, the last element in `<body>`. A deferred module (the first draft) held
+- `field.js` is an **async** module, the last element in `<body>` but for `flow/flow.js`, also async, which follows
+  it (FLOW.md). A deferred module (the first draft) held
   DOMContentLoaded until its 400 KB had arrived, and the copy's entrance waits for DOMContentLoaded, so the copy
   stayed invisible until the field's code was in. Async, it runs as soon as it has arrived, before or after
   DOMContentLoaded (both *measured*: it boots either way; it only looks up `#fl`, `.hero`, `.hero__inner`,
@@ -289,7 +292,10 @@ Run with the policy as a response header (`/tmp/hero-port/understand/tools/csp_c
 - `default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self';
   style-src 'self'; img-src 'self'; font-src 'self'` gives **exactly the page's two pre-existing violations**: the
   Google Fonts stylesheet (index.html:15) and the icon sprite's `style="position:absolute"` (the sprite near the end of
-  index.html, at :343 before the port). The same holds with `?lab&gl=0`. The field boots (WebGL, 19 cards).
+  index.html, at :343 before the port). The same holds with `?lab&gl=0`. The field boots (WebGL, 19 cards). With the
+  flow on the page there is a third, the flow's own Google Fonts stylesheet (index.html:91; the sprite is at :285
+  now): *measured* after the flow port, a full scroll at 1440x900 gives those three and nothing from the hero or the
+  flow, which still runs (`data-flow="on"`).
 - With Google Fonts allowed and `connect-src 'none'; worker-src 'none'`, only the sprite's violation remains, and
   the field boots with all 17 models.
 
@@ -317,8 +323,9 @@ Notes for the app:
   checks its own output for these (see "Re-syncing").
 - hero.css's rules are scoped to the hero, except the header pass-through (`.hero-on .site-header`, outside the
   section) and its six `@keyframes` names, which are document-global and upstream's: `hx-in`, `rm-in`, `hx-pt`,
-  `hx-ch`, `hbeam-run`, `hbeam-in`. The static site defines no other keyframes; **grep the Rails landing CSS for those
-  six names** before linking hero.css next to it.
+  `hx-ch`, `hbeam-run`, `hbeam-in`. The static site's other keyframes are the flow's (`fl-up`, `fl-shim`, `fl-rot`,
+  `fl-load`, `fl-fire`, `fl-dot`, `fl-blink`, `build-up`: FLOW.md, "DOM contract"), none of them colliding; **grep the Rails landing
+  CSS for those six names** before linking hero.css next to it.
 - **No SVG files in the pipeline.** #1484's `StaticAssetsTest` fails any `.svg` on the asset load path: a pipeline
   file is served on mock.shop's own origin with no CSP of its own. So the scrim goes inline in the Rails markup (see
   "DOM contract"), as the landing's icons do. On this static site `hero/scrim.svg` stays an `<img>`: an SVG loaded as
@@ -381,8 +388,8 @@ and about fifty number knobs (`drift=`, `sz=`, `focus=`, ...; see the field's `n
 - **Steady state** (the review's trace): 60 fps with no dropped frames at 1440, but the main thread spends ~20-30%
   more than the lab at the same room (105-132 vs 85-110 ms per second of TaskDuration; script time the same). The
   cards' per-frame opacity/filter/transform changes make Chromium re-layerize the paint chunks of this whole 6.5k px
-  page, not just the hero (PaintArtifactCompositor ~0.36 vs 0.12 ms a frame). On a phone (390x844) the port is
-  cheaper than the lab. `content-visibility:auto` on the sections below the hero would cut it, but that touches other
+  page (5.8k px since the flow replaced the feature sections), not just the hero (PaintArtifactCompositor ~0.36 vs
+  0.12 ms a frame). On a phone (390x844) the port is cheaper than the lab. `content-visibility:auto` on the sections below the hero would cut it, but that touches other
   sections (not done).
 
 ## Re-syncing from upstream
@@ -439,14 +446,16 @@ survive:
    Only the H1's element box is narrower (800, the column); document heights are identical (`rects_cmp.py`).
 4. **JS off:** byte-identical screenshots at the 12 sizes above, and the whole page at 1440 and 390 (`nojs_fix.py`).
 5. **Below the hero:** the whole page at 1440 with `?lab&hold=8`, y >= 790: 0 of 8,264,160 pixels differ
-   (`below_cmp_tall.py`). Capture it by loading at 1440x900 and then making the viewport the page's full height,
-   not with Playwright's `full_page=True`. Chromium's beyond-viewport capture sometimes reports the window as 1x1
+   (`below_cmp_tall.py`; at 91ac37c, before the flow replaced the feature sections: since then the sections below are
+   compared one by one, position-matched against the pristine page, FLOW.md "How to verify"). Capture it by loading
+   at 1440x900 and then making the viewport the page's full height, not with Playwright's `full_page=True`. Chromium's beyond-viewport capture sometimes reports the window as 1x1
    for a moment, reliably after a `wait_for_function`, and on the pristine page too. main.js's `(max-width: 639px)`
    listener then turns the storefront frame to its phone capture, and the shot differs in 949k pixels for a reason
    that has nothing to do with the page. The full-height method gives the pristine page 0 differing pixels against
    `baseline/full-1440.png`, over the whole page.
 6. **Behaviour:** tabs (click, arrow keys), Copy (clipboard holds the snippet, "Copied" state, live region) in the
-   hero and the CTA, tab order from the top (12 stops identical to the pristine page, settled and mid-intro), the
+   hero and the CTA, tab order from the top (12 stops identical to the pristine page, settled and mid-intro; at
+   91ac37c, where stops 6-10 were the old Start / Build / Launch controls, which the flow's replaced), the
    H1's name at 0.5s and 4.5s (`ui_check.py`, `tab_cta.py`); hover, drag tumble and text selection
    (`drag_check.py`); the pointer pan, same as the lab's (`pan_check.py`); the phone tab hold (`tabs_fix.py`,
    `tabs_wide.py`, `phone_px.py`, `ghost_a11y.py`); pinch and swipes on a product (`pinch_fix.py`, `touch_fix.py`);

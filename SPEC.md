@@ -1,5 +1,12 @@
 # mock.shop landing page — build spec (desktop, from Figma export)
 
+> **Superseded in part (2026-10-14).** The four feature sections (START / BUILD / TEST / LAUNCH: sections 3-5 below,
+> their pills under "Interactivity" and their panel / terminal rules under "Responsive") are replaced by Kyu Kim's
+> animated Start, Build and Test (`FLOW.md`); LAUNCH is gone. The page is 5780px tall at 1440 now, not 6529:
+> everything from the storefront down sits 749px higher (storefront 3376, CTA 4275, FAQ 4677, footer 5579-5780). The
+> hero is animated (`HERO.md`). The rest stands as the record of the static build; the notes marked *superseded*
+> below point to what replaced each part.
+
 Goal: a static landing page (plain HTML + CSS + vanilla JS, no build step) that reproduces
 `reference/mockup-desktop.png` (1440 x 6529, 1x) as closely as possible at a 1440px viewport,
 degrades gracefully down to 375px (a dedicated mobile design will come later), and deploys to
@@ -35,7 +42,8 @@ plus preconnects to fonts.googleapis.com and fonts.gstatic.com. `-webkit-font-sm
 - `--mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace`
 
 Colors:
-- page background `#080b0c` (hero area, CTA/FAQ area). The four feature sections sit on a pure `#000000` block.
+- page background `#080b0c` (hero area, CTA/FAQ area). The four feature sections sit on a pure `#000000` block
+  (*superseded*: the three flow steps sit on it now, with the same 48px top radius).
 - footer band `#02090a`. storefront-preview container `#141a1a`.
 - text white `#ffffff`; body/paragraph gray `#b3b3b3` (measured #b2b2b2–#b8b9b9); footer link gray `#a1a1aa`.
 - accent green `#00f4b9` (eyebrows, terminal bullets + bullet dots).
@@ -67,7 +75,8 @@ Container: 1260px wide (90px side margins). Two-column feature grid inside it: p
    - Tabs (text y 467–481; 2px bottom border at y 490–491): "Prompt" (active: white text, white 2px underline) · "CLI" · "Skill" (inactive #b5b6b6, bar rgba(255,255,255,.2)). Tab padding 0 17px; tab row spans x 616–823, centered.
    - Code well (x 447–991 = 545 wide, y 509–570 = 62 tall, 17px gap below the tab bar): mono 14px two lines, white, padding-left 16px; text block vertically centered. Right inside: white "Copy" button (x 881–981, y 518–561 → 100x44, radius 8, inset 10px) with the copy icon (20px, black) + "Copy" 16px/600 black.
    - Hero background image already contains the floating 3D products and the star streaks; text region was inpainted dark.
-3. BLACK BLOCK (y 790–4124, bg #000, 44px top-left/right radius so the hero's #080b0c shows in the corners). Contains four feature sections with this rhythm: eyebrow top at 872 / 1707 / 2540 / 3314 (≈88px after the previous panel bottom; 82px after the hero). Within a section: eyebrow (16px) → 20px → H2 (cap-top 31px below eyebrow top) → paragraph top 20px below the H2 descenders (eyebrow 872 → H2 903 → p 976 → pills 1044 → panels 1131). Pills row: 44px tall, 9px gaps, 27px below paragraph, 44px above the panels. Panels: 488px tall (y 1131–1619), 1px border rgba(255,255,255,.12), radius 16.
+3. *Superseded by `FLOW.md` (sections 3-5: the block is y 790-3376 now, holding Kyu's Start, Build and Test; no
+   LAUNCH).* BLACK BLOCK (y 790–4124, bg #000, 44px top-left/right radius so the hero's #080b0c shows in the corners). Contains four feature sections with this rhythm: eyebrow top at 872 / 1707 / 2540 / 3314 (≈88px after the previous panel bottom; 82px after the hero). Within a section: eyebrow (16px) → 20px → H2 (cap-top 31px below eyebrow top) → paragraph top 20px below the H2 descenders (eyebrow 872 → H2 903 → p 976 → pills 1044 → panels 1131). Pills row: 44px tall, 9px gaps, 27px below paragraph, 44px above the panels. Panels: 488px tall (y 1131–1619), 1px border rgba(255,255,255,.12), radius 16.
    Section copy:
    - START — "Tell your agent what you're selling" — "It finds the closest of 100+ catalogs, from graphic tees to espresso gear, each built the way merchants build theirs, and sets it up on a Shopify preview store. No signup or card needed." (break after "way") — pills: Streetwear (active) · Decor · Beauty · Sports.
    - BUILD — "Design the storefront, not the data" — "The catalog is handled, so you go straight to the brand: layout, type and colour. Prompt until it looks like the store you want." (break after "until it") — pills: Technical (active) · Vibrant · Bold · Elegant.
@@ -87,7 +96,8 @@ Container: 1260px wide (90px side margins). Two-column feature grid inside it: p
    - BUILD: prompt "Make my store feel fun and loud, like a sticker sheet. Sunny yellow background, chunky black outlines with hard drop shadows, rounded corners, a playful geometric font, and a coral pop for the buy button. Let the product photos swipe like a carousel." bullets: Reading theme settings / Updating colours and fonts background / Restyling buttons, borders and gallery / Pushing theme. result: "Done. Your storefront now has a sticker-sheet look: a sunny yellow background, bold outlines with hard shadows, and coral buy buttons."
    - TEST: prompt "Test the cart with the graphic tee, then try checkout." bullets: Checking stock: Slate sold out in XS to M / Adding Slate / L to cart / Filling in contact and shipping details / Paying with the test card / Placing order. result: "Cart and checkout both work. The order went through at $58.00 with the test card. Ready to launch?"
    - LAUNCH: prompt "I'm ready to launch. What's left?" bullets: Checking products, theme and menu / Getting your claim link. result: "Your store is ready. Claim it with this link, then add your products, pick a plan and turn off the password page to go live." ("this link" underlined, href https://www.shopify.com/)
-6. STOREFRONT PREVIEW (y 4125–5025+, full-width container bg #141a1a, 44px top radius, sits directly under the black block; the CTA panel below overlaps it with its own 44px top radius starting at y=5025, so the container visually ends there):
+6. STOREFRONT PREVIEW (*y positions superseded: 749px higher at 1440 now, storefront 3376, CTA 4275, FAQ 4677,
+   footer 5579-5780*) (y 4125–5025+, full-width container bg #141a1a, 44px top radius, sits directly under the black block; the CTA panel below overlaps it with its own 44px top radius starting at y=5025, so the container visually ends there):
    - Row at y 4205–4248: centered device toggle — two 44px circles 12px apart (desktop active #2c3131 with a white monitor icon 24px; mobile #131313 with a white phone icon ~14x18) — and right-aligned white pill button "Start with this store" (194x44, 16px/600 black) ending at x=1349, linking to https://apparel-streetwear.hydrogen.mock.shop/ (target _blank).
    - 24px below: the storefront frame (x 90–1350 = 1260 wide, top at y 4273, 20px top radius, overflow hidden) showing the VibePulse Studio home page, clipped at the bottom by the CTA panel (visible height 751px = 5024-4273).
      DEFAULT (static, faithful to the mock): desktop state shows `assets/img/storefront.webp` (1260x751, the mock's own screenshot); mobile state shows `assets/img/store-mobile.webp` (780x1688 = 2x capture of the live store at 390x844, cookie banner dismissed) inside a 390px-wide, 751px-tall frame centered in the container (object-fit: cover, object-position: top). Transition between states ~200ms.
@@ -105,16 +115,18 @@ Container: 1260px wide (90px side margins). Two-column feature grid inside it: p
 ## Interactivity (vanilla JS, no dependencies; everything must also be reachable by keyboard)
 - Tabs (hero + CTA share one state; role="tablist"): Prompt → "Build me a storefront from a mock.shop store.\nStart at https://mock.shop/llms.txt" (two lines exactly as shown). CLI → `npm i -g @shopify/cli && shopify store create preview`. Skill → `npx skills add Shopify/shopify-ai-toolkit`. The well keeps its 62px height (single-line snippets vertically centered).
 - Copy button: `navigator.clipboard.writeText` of the current snippet (prompt copies with the real newline); on success swap label to "Copied" for 1.5s (keep the button width stable). Fallback to a hidden textarea + execCommand if clipboard is unavailable.
-- Start pills: switch active pill; swap the main card (grid image, title, host, description, counts from stores.json: streetwear=VibePulse Studio 8/96/2; decor=Havenly Nest …; beauty=Lumina Botanica …; sports=VigorVibe Active …) and the terminal transcript: prompt "I want to sell <category phrase>." (oversized, heavyweight t-shirts / sculptural home decor and soft textiles / botanical daily skincare / high-performance activewear), bullets unchanged, result "Found <Name>, a <category> catalog with <two product kinds>. Your store is ready with its <N> products and theme. Want to change the look next?". Inline the data as a JS object (no fetch) so file:// works.
-- Build pills: switch active pill and swap the terminal prompt + result to a style-matched variant (write 4 short, plausible transcripts; keep the Technical one exactly as in the mock). The preview image stays (flag in TODO).
+- *Superseded (the flow's own pills: `FLOW.md`):* Start pills: switch active pill; swap the main card (grid image, title, host, description, counts from stores.json: streetwear=VibePulse Studio 8/96/2; decor=Havenly Nest …; beauty=Lumina Botanica …; sports=VigorVibe Active …) and the terminal transcript: prompt "I want to sell <category phrase>." (oversized, heavyweight t-shirts / sculptural home decor and soft textiles / botanical daily skincare / high-performance activewear), bullets unchanged, result "Found <Name>, a <category> catalog with <two product kinds>. Your store is ready with its <N> products and theme. Want to change the look next?". Inline the data as a JS object (no fetch) so file:// works.
+- *Superseded (the flow's own theme pills: `FLOW.md`):* Build pills: switch active pill and swap the terminal prompt + result to a style-matched variant (write 4 short, plausible transcripts; keep the Technical one exactly as in the mock). The preview image stays (flag in TODO).
 - Device toggle: see section 6 (static image swap by default; live iframe only when data-live="true"); aria-pressed on the two buttons.
 - FAQ accordion: one open at a time, animated height is optional, must work without JS if using <details>.
 - Respect `prefers-reduced-motion`. No console errors. No layout shift when fonts load (set font-display swap and reserve sizes).
 
 ## Responsive (desktop-first; mobile design will be supplied later — do a sane adaptation, not a redesign)
 - ≥1280: as mocked, container 1260 centered (margins grow on wider screens; cap the container at 1260).
-- 1024–1279: container = 100% − 2×48px; feature grid becomes preview (flex 1) + terminal 320px.
-- <1024: stack terminal under the preview panel (full width, min-height 360); H1 48px, H2 40px; hero bg still cover.
+- 1024–1279: container = 100% − 2×48px; feature grid becomes preview (flex 1) + terminal 320px (*the feature grid is
+  superseded: the flow keeps Kyu's own breakpoints, 1180 / 960 / 600px*).
+- <1024: stack terminal under the preview panel (full width, min-height 360; *superseded for the flow*); H1 48px, H2
+  40px; hero bg still cover.
 - <640: side padding 20px; pills wrap; store card stacks grid above text; FAQ question 20px; footer stacks (logo, then links wrapped). No horizontal scrolling at 375px.
 
 ## Accessibility & quality bar
@@ -124,4 +136,5 @@ Container: 1260px wide (90px side margins). Two-column feature grid inside it: p
 - `.nojekyll` file in the published root. No external JS. Total page weight under ~2.5MB (use the .webp assets with <picture> png fallback or just .webp — Chrome/Safari/Firefox all support WebP).
 
 ## Assets (all in assets/img; sizes at 1x)
+(*The panel and screenshot crops are reference only now: the flow draws its own visuals from `flow/assets/`.*)
 hero-bg.{webp,png,jpg} 1440x790 · panel-start.webp 898x487 (reference only; build the Start panel in HTML) · panel-build.webp, panel-test.webp, panel-launch.webp 898x487 · start-grid.{png,webp} 285x162 (= grid-streetwear) · grid-streetwear/decor/beauty/sports.{png,webp} 285x162 · storefront.{png,webp} 1260x751 (mock crop; the desktop state) · store-mobile.{png,webp} 780x1688 (live capture at 390x844 @2x, cookie banner dismissed; the mobile state) · build-screenshot.png 640x458, test-screenshot.png 640x400, launch-screenshot.png 640x421 (inner screenshots only, optional).
