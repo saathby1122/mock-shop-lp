@@ -144,8 +144,9 @@ Left to decide or do:
   a reader below the flow when it inserts the pill rows; the idle enhanced flow costs ~20% more main-thread time per
   hero frame; the "Copied" live region never announces; a `flow/flow.js` that never answers keeps the step lines
   hidden; a stage whose mount throws leaves its prompt box empty.
-- **Rails:** 55 of the flow's assets are SVG `<img>` icons and the app takes no SVG files: a vetted exception for
-  `landing/flow/` or 3x PNGs (FLOW.md, "CSP"); eight more font families to self-host.
+- **Rails:** 55 of the flow's assets are SVG `<img>` icons and the app takes no SVG files: the Rails landing took 3x
+  PNGs (FLOW.md, "CSP"), which `tools/flow_icons.py` draws into `flow-icons/` ("Re-syncing"); eight more font families
+  to self-host.
 - Browsers without constructable style sheets (Safari < 16.4, Firefox < 101) get the static transcripts.
 
 ## Infrastructure

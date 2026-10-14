@@ -34,7 +34,11 @@ the hero is followed by this flow, then the storefront preview, the CTA, the FAQ
 | `flow/flow.css` | **generated**: upstream `flow.css`, `stages/start.css`, `stages/build.css`, `stages/test.css`, concatenated, 4 edits (C1-C4), then the port's `--flow-css` sentinel (C5) | 134 KB (33 KB) |
 | `flow/head.js` | **generated**, not from upstream: `html.flow-on`, the flow's error listener and its load backstop | 4.2 KB (1.8 KB) |
 | `flow/assets/{start,build,test,shell,video}/` | the 169 files the stages can ask for, byte for byte: 114 WebP, 55 SVG | 573 KB |
+| `flow/assets.txt`, `flow/markup.html` | **generated**: the asset keys, one per line (what `--list-assets` prints), and the flow block `index.html` carries (what `--print-markup` prints) | 5.1 KB, 5.5 KB |
+| `flow/MANIFEST.sha256` | **generated**: the sha256 of every file above, with the upstream commit and pin, so the Rails landing re-syncs from this repository without the lab ("Re-syncing") | 18 KB |
+| `flow-icons/` | **generated** by `tools/flow_icons.py`, for the Rails landing, which serves no SVG file: a PNG of each SVG icon at three times the largest size the flow draws it at, `widths.txt` (each icon's own width) and `MANIFEST.sha256` (those files and what they were drawn from) | 33 KB (the PNGs 18 KB) |
 | `tools/flow_port.py` | the generator (python3, stdlib only) | |
+| `tools/flow_icons.py` | the icon rasteriser (python3 with Playwright, its Chromium and Pillow) | |
 | `index.html` | the head hook, the stylesheet and font links, the three steps' markup, the script tag (below) | |
 
 `flow/flow.js` and `flow/flow.css` start with a generated **PORT NOTES** comment: the upstream path and commit, the
@@ -261,7 +265,8 @@ A sketch (*unverified*; `FLOW_ASSETS` would be a committed list of the keys belo
 <% flow_assets = MockShop::Discovery::Landing::FLOW_ASSETS.to_h { |key| [key, asset_path("landing/flow/#{key.delete_prefix("assets/")}")] } %>
 ```
 
-The keys (`python3 tools/flow_port.py <lab> --list-assets` prints them one per line; keep the Rails list in step):
+The keys (`flow/assets.txt` holds them one per line, as `python3 tools/flow_port.py <lab> --list-assets` prints them;
+the Rails re-sync copies it):
 - `assets/build/` (26): bold-cart.svg, bold-chevron.svg, bold-minus.svg, bold-next.svg, bold-plus.svg, bold-prev.svg,
   bold-search.svg, elegant-cart.svg, elegant-chevron.svg, elegant-minus.svg, elegant-plus.svg, elegant-search.svg,
   technical-cart.svg, technical-chevron.svg, technical-minus.svg, technical-plus.svg, technical-search.svg,
@@ -319,7 +324,8 @@ fails any SVG on the asset load path. Options (a decision for the user):
    they are (an SVG loaded as an image is its own document with scripts off; under the policy above it reports
    nothing, *measured* on this site). It reverses part of #1484's blanket rule.
 2. Rasterise them to PNG at 3x and map the `.svg` keys to the PNGs in `data-flow-assets`: no policy change, but the
-   pixels differ from the SVGs and regenerating needs a browser (the 55 PNGs are not made yet).
+   pixels differ from the SVGs and regenerating needs a browser. The Rails landing took this one: `tools/flow_icons.py`
+   draws the PNGs ("Re-syncing").
 3. Inline SVG is not a fit: every file's root carries `style="display: block;"` (CSP), the Figma ids repeat across
    files (`Vector`, `clip0_0_4`), and the stage CSS targets `img` in those slots.
 
@@ -423,7 +429,38 @@ python3 tools/flow_port.py /path/to/mock-shop-lp/project/flow-lab               
 python3 tools/flow_port.py /path/to/mock-shop-lp/project/flow-lab --check          # compares; exit 1 on a difference
 python3 tools/flow_port.py /path/to/mock-shop-lp/project/flow-lab --print-markup   # the block index.html must carry
 python3 tools/flow_port.py /path/to/mock-shop-lp/project/flow-lab --list-assets    # the data-flow-assets keys
+python3 tools/flow_icons.py            # then flow-icons/, the icons for the Rails landing (Playwright and Pillow)
+python3 tools/flow_icons.py --check    # draws them again and compares; exit 1 on a difference
 ```
+
+- **What the Rails landing takes, and how.** Besides `flow.js`, `flow.css`, `head.js` and `assets/`, the generator
+  writes (and `--check`s) `flow/assets.txt`, what `--list-assets` prints, `flow/markup.html`, what `--print-markup`
+  prints, and `flow/MANIFEST.sha256`, every file's sha256 with the upstream commit and the pin (how many upstream
+  files, and the sha256 of their listing; `shasum -a 256 -c flow/MANIFEST.sha256` from the root checks it), so the
+  Rails landing re-syncs from this repository without the lab: the mock-shop zone's
+  `bin/rails "landing:resync[/path/to/this/checkout]"` takes a clean, committed checkout, checks every file against
+  the manifests, copies the scripts (by name, so a new one stops it), the stylesheet, the list and the WebPs byte for
+  byte, and makes its Start, Build and Test partials from `flow/markup.html` (HERO.md's files too). The block round
+  the three articles (the stylesheet and fonts links, the section) is mirrored by hand there, so when it changes that
+  re-sync stops until the Rails side is redone.
+- **The icons** (`tools/flow_icons.py`): the Rails landing serves no SVG file, so it takes a PNG of each SVG icon and
+  gives it back its SVG's width with CSS. The script serves this checkout on 127.0.0.1 and plays the flow in
+  Playwright's Chromium offline: Chromium resolves no other host, so the page's Google Fonts fail at once and the run
+  needs no network (the fonts do not change how large the flow draws its icons; a run with them drew the same files).
+  It plays all three steps through, then each other Start category's and every Build theme's final frame, at 16
+  viewports from 320 to 2560 wide, the phones at dpr 3 (about 13 minutes), and writes `flow-icons/`: each SVG drawn at
+  three times (rounded up) the largest size the flow draws it at, on a transparent background (a square SVG gets a
+  square PNG); `widths.txt`, each icon's width as Chromium lays the SVG out (a whole number of 1/64px) and whether the
+  flow sizes its `<img>` by a width or height attribute; and `MANIFEST.sha256`, the sha256 of those files and of what
+  they were drawn from (every SVG, `flow/flow.css` and `flow/flow.js`). It stops on a page that does not load, on an
+  SVG the page never draws, on an icon with a width or height attribute in one place and none in another, and on a
+  PNG with ink where its SVG draws nothing or none where it draws. It warns where another run could draw a PNG a
+  pixel off: where a transform makes an icon's largest size (sampled every 50 ms), within 0.02 PNG pixels of a whole
+  one that the icon's laid-out size alone does not pass.
+  `shasum -a 256 -c flow-icons/MANIFEST.sha256` fails once an input has changed: rerun the script then and commit
+  `flow-icons/` with the change, because the Rails re-sync refuses icons that were not drawn from the `flow/` it
+  takes. The PNGs depend on the Chromium that draws them (the manifest names it), so another Chromium can differ in
+  antialiasing; `python3 -m playwright install chromium` gets Playwright's own.
 
 - It reads the five scripts, the four stylesheets, `section.html` and the 169 assets, and executes nothing from that
   repository (not even git). The output depends only on the upstream bytes: a rerun reproduces the files byte for
@@ -513,7 +550,14 @@ this build:
    `.innerHTML`, a new repeating timer (LOOPS), `location.search` or `currentScript` in a stage, `url(` / `@import` /
    `@font-face` / a `.js` selector in a stylesheet, a second `--flow-css`, moved anchors including B9, C3, C4 and L5)
    and on the index.html faults (no head hook, an extra modulepreload, edited markup, the script not last or `defer`,
-   the flow's fonts link or the stylesheet's `data-flow-css` dropped, flow.css moved to `<head>`).
+   the flow's fonts link or the stylesheet's `data-flow-css` dropped, flow.css moved to `<head>`). `flow/assets.txt`
+   and `flow/markup.html` are byte for byte what `--list-assets` and `--print-markup` print, `flow/MANIFEST.sha256`
+   checks with `shasum -a 256 -c`, and adding the three changed no other file under `flow/`.
+9. **Icons:** a fresh, offline `tools/flow_icons.py` run on the export (its `flow/` is baa9299's) drew the 55 PNGs byte
+   for byte as the ones the Rails landing already served (drawn at 7180b85 by the scratch rasteriser this tool
+   replaces) and as a run with the page's Google Fonts loaded, and its widths are the six that landing.css gives them
+   (10.671875, 8.53125, 28 and 32px in Build and Test, 8.890625 and 7.109375px in Start; the shell's three glyphs
+   have width and height attributes); a second run, `--check`, matched the first byte for byte.
 
 ## Known issues and open decisions
 

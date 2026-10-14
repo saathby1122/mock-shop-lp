@@ -37,6 +37,7 @@ hero is exactly the static picture it was (`assets/img/hero-bg.webp`).
 | `hero/vendor/LICENSE.txt` | three.js's MIT licence (the lab's `vendor/LICENSE`, renamed so its type follows from its extension) | 1 KB |
 | `hero/scrim.svg` | the lab's `option-3/scrim.svg`, byte for byte. Rails inlines it instead: the asset pipeline takes no SVG files (see "DOM contract") | 674 B |
 | `hero/products/00.webp` ... `88.webp` | the 89 product photos the module can ask for (no-WebGL path only), byte for byte | 1.65 MB, 87 KB max |
+| `hero/MANIFEST.sha256` | **generated**: the sha256 of every file above but `hero.css`, with the upstream commit and pin, so the Rails landing re-syncs from this repository without the lab ("Re-syncing") | 9 KB |
 | `tools/hero_port.py` | the generator (python3, stdlib only) | |
 | `index.html` | `<head>` links, the hero markup, the module script (below) | |
 
@@ -402,9 +403,9 @@ python3 tools/hero_port.py /path/to/mock-shop-lp/project/hero-stage/hero-lab --c
 - It reads upstream `index.html`, `vendor/RoomEnvironment.js`, `vendor/three.module.min.js`, `vendor/LICENSE`,
   `option-3/scrim.svg` and `products/`, and executes nothing from that repository (not even git). It writes
   `hero/intro.js`, `hero/field.js`, the vendored files, the scrim, and the photos the module's `PHOTOS`/`MODELS`
-  tables can ask for (stale photos are removed). The output depends only on the upstream bytes, so a rerun
-  reproduces the files byte for byte (`--check` exits 0; also from another working directory and another copy of
-  the lab).
+  tables can ask for (any other file under `hero/` but `hero.css` is removed, and `--check` reports it). The output
+  depends only on the upstream bytes, so a rerun reproduces the files byte for byte (`--check` exits 0; also from
+  another working directory and another copy of the lab).
 - **The pin covers every file it reads or copies**: `PIN` holds the sha256 of index.html, RoomEnvironment.js,
   three.module.min.js, LICENSE, scrim.svg and the 89 photos at 1914c8e. If any differs (or a pinned file is missing),
   it stops and lists them; review the upstream change, rerun with `--commit <sha>` (the headers then name that
@@ -421,6 +422,15 @@ python3 tools/hero_port.py /path/to/mock-shop-lp/project/hero-stage/hero-lab --c
   beam, scrim and wash rules) and the hero markup in `index.html` (the beam SVG is the lab's K916-933 with every
   `rx` at 9.5; the ghost `<pre>`s are main.js's SNIPPETS, so change them together). Nor is the Rails partial's
   inline scrim: if the pin stops on a changed `option-3/scrim.svg`, redo its three edits ("DOM contract") by hand.
+- **The Rails landing re-syncs from this repository, not from the lab.** `hero/MANIFEST.sha256`, written and
+  `--check`ed with the rest, lists every generated file with its sha256 (`shasum -a 256 -c hero/MANIFEST.sha256`
+  from the root checks them), the upstream commit and the pin (how many upstream files, and the sha256 of their
+  listing). The mock-shop zone's `bin/rails "landing:resync[/path/to/this/checkout]"` takes a clean, committed
+  checkout, checks each file against the manifest and copies `intro.js`, `field.js`, the two vendored files and
+  `products/` byte for byte (and the flow's files: FLOW.md, "Re-syncing"); it copies the scripts by name, so a new
+  file here stops it. What is ported by hand here is ported by hand there: when `hero/hero.css`, `hero/scrim.svg` or
+  the hero markup in `index.html` changes (the section, and the tags that load a `hero/` file: the stylesheet, the
+  modulepreload and both scripts), that re-sync stops until the Rails port of it is redone too.
 
 ## How to verify
 
@@ -465,7 +475,9 @@ survive:
    (`hooks_check.py`); CSP (above).
 7. **Generator:** `python3 tools/hero_port.py <lab> --check` exits 0; a fresh run into an empty tree reproduces the
    committed files byte for byte; and the hardening stops on each forbidden construct injected into a copy of the
-   lab, and on a changed three.js or photo without `--commit` (`harden_test.py`).
+   lab, and on a changed three.js or photo without `--commit` (`harden_test.py`). `hero/MANIFEST.sha256` checks with
+   `shasum -a 256 -c`, and adding it changed no other file under `hero/`; `--check` exits 1 on a file under `hero/`
+   it does not write (`hero.css` aside).
 
 ## Known issues and open decisions
 
