@@ -65,6 +65,18 @@
        the flow on only where constructable style sheets exist (there, the static transcripts show instead).
    S8. L1215, L1598: the Reference PDP's icons, refHTML()'s and phRefHTML()'s ic() (the same line twice):
        FLOW.asset(BASE + 'pdp-' + CAT_KEY + '-' + k + '.svg').
+   S9. L1176-1177: pick() restarted the step with `r.click()` on the step's Replay button (`.fl-replay`): a click event
+       that every click listener on the page saw, so the Rails landing's Dux reported each pick as a press of Replay
+       (data-component-name="replay", flow.js L3) as well as of the pill (measured on the Rails page: Decor by mouse
+       sent `store-pill-decor` then `replay`; Beauty by Enter and Sports by Space, `replay` alone). ->
+       `r.dispatchEvent(new CustomEvent('fl-replay'))`, an event of the flow's own (it does not bubble) that flow.js
+       answers with Replay's click handler (its L6): the same restart at the same moment (a run, or final() under
+       reduced motion), with no click.
+   S10. L1182-1185: onPick() picked on Enter or Space in its keydown path, so a key pick dispatched no click at all:
+        Dux, which counts clicks, saw it only as S9's click on Replay. -> after preventDefault(), as upstream, the
+        keydown path calls the pill's click() and returns: the pick runs on that click, through onPick()'s click path,
+        once, and a key pick dispatches one click event, on the pill, as a mouse pick does (and as Enter on a <button>
+        would).
 
    stages/build.js
    B1. L127-130: the asset folders `dir('../assets/build/')` and `dir('../assets/video/')` (resolved against this
@@ -138,6 +150,10 @@
        (section.html's were classic scripts after the stylesheets, which wait for them), so it can run before the
        stylesheet has arrived; and with flow/flow.css failing, the stages built into unstyled markup (measured at
        1440x900: a 38.6k px page, 1593px wide).
+   L6. L298-300: Replay's click handler, `function () { if (FLOW.reduced) final(); else run(); }`, -> the same body as
+       a named function, replayStep(), which also answers 'fl-replay' on the button: the event stages/start.js's pick()
+       sends it (its S9) to restart the step, where upstream clicked the button, a click the Rails landing's Dux
+       counted as a press of Replay. A click on Replay runs it as before.
 
    Verbatim otherwise: every stage, timing and easing, the four categories and the four themes, the transcripts
    (Start's other categories and Build's themes keep their prompts and replies in the code), Replay and Copy prompt,
@@ -396,7 +412,7 @@
   };
 })();
 
-/* ==== stages/start.js @ d931946 (sha256 ddcc4b51e8c16503): edits S1, S2, S3, S4, S5, S6, S7, S8 ==== */
+/* ==== stages/start.js @ d931946 (sha256 ddcc4b51e8c16503): edits S1, S2, S3, S4, S5, S6, S7, S8, S9, S10 ==== */
 /* stages/start.js -- START: "Tell your agent what you're selling".
 
    mount   the empty stage under its bottom gradient (black 0 -> 0.6). The
@@ -1572,8 +1588,10 @@
       if (E) { build(E.vis); paintMount(); }
       words();
     }
+    // PORT (S9): the restart through Replay's own handler (flow.js L6), not a click on the button, which every
+    // click listener saw: the Rails landing's Dux reported each pick as a Replay press too
     var r = step.querySelector('.fl-replay');
-    if (r) r.click();
+    if (r) r.dispatchEvent(new CustomEvent('fl-replay'));
   }
   function onPick(e) {
     var p = e.target && e.target.closest ? e.target.closest('.fl-step[data-stage="start"] .start-pill[data-cat]') : null;
@@ -1581,6 +1599,10 @@
     if (e.type === 'keydown') {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       e.preventDefault();
+      // PORT (S10): a key picks through the pill's click(), one click event as a mouse pick has; the pick runs
+      // on that click (below), once
+      p.click();
+      return;
     }
     pick(p.getAttribute('data-cat'), p.closest('.fl-step'));
   }
@@ -4695,7 +4717,7 @@
   });
 })();
 
-/* ==== flow.js @ d931946 (sha256 3af7a7810117079d): edits L1, L2, L3, L4, L5 ==== */
+/* ==== flow.js @ d931946 (sha256 3af7a7810117079d): edits L1, L2, L3, L4, L5, L6 ==== */
 /* flow.js -- runs the four steps. Each .fl-step pairs an Agent terminal with
    a stage (stages/<name>.js, see flow-core.js for the contract).
 
@@ -5029,9 +5051,13 @@
       } catch (e) { FLOW.swallow(e); }
     }
 
-    replay.addEventListener('click', function () {
+    // PORT (L6): Replay's handler, named, for its click and for 'fl-replay', the event stages/start.js's pick()
+    // (its S9) sends the button to restart the step without a click (one analytics would count as a press)
+    function replayStep() {
       if (FLOW.reduced) final(); else run();
-    });
+    }
+    replay.addEventListener('click', replayStep);
+    replay.addEventListener('fl-replay', replayStep);
 
     var api = { name: name, root: root, run: run, reset: reset, final: final, S: S };
     all.push(api);

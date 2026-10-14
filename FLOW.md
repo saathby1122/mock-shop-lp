@@ -30,7 +30,7 @@ the hero is followed by this flow, then the storefront preview, the CTA, the FAQ
 
 | Path | Origin | Size (gzip -9) |
 | --- | --- | --- |
-| `flow/flow.js` | **generated**: upstream `flow-core.js`, `stages/start.js`, `stages/build.js`, `stages/test.js`, `flow.js`, concatenated in that order, 32 edits (F1-F6, S1-S8, B1-B9, T1-T4, L1-L5) | 288 KB (93 KB) |
+| `flow/flow.js` | **generated**: upstream `flow-core.js`, `stages/start.js`, `stages/build.js`, `stages/test.js`, `flow.js`, concatenated in that order, 35 edits (F1-F6, S1-S10, B1-B9, T1-T4, L1-L6) | 290 KB (94 KB) |
 | `flow/flow.css` | **generated**: upstream `flow.css`, `stages/start.css`, `stages/build.css`, `stages/test.css`, concatenated, 4 edits (C1-C4), then the port's `--flow-css` sentinel (C5) | 134 KB (33 KB) |
 | `flow/head.js` | **generated**, not from upstream: `html.flow-on`, the flow's error listener and its load backstop | 4.2 KB (1.8 KB) |
 | `flow/assets/{start,build,test,shell,video}/` | the 169 files the stages can ask for, byte for byte: 114 WebP, 55 SVG | 573 KB |
@@ -385,13 +385,17 @@ flow).
   subdomain>"`: apparel-streetwear, home-decor, clean-beauty, apparel-snowwear (from the stage's own data; JS, S6).
 - Build's pills: `data-component-name="style-pill-<technical|vibrant|bold|elegant>"` (JS, B3).
 - Copy prompt and Replay: `data-component-name="copy-prompt"` / `"replay"` (JS, L3).
+- One click per press: a Start pick dispatches one click, on its pill, by mouse and by Enter or Space (the stage
+  calls the pill's `click()`, S10), and restarts the step through Replay's own handler without clicking Replay
+  (`'fl-replay'` on the button, S9 and L6). Upstream clicked Replay, so Dux reported every pick as a Replay press
+  too, and a key pick as that alone.
 
 The pills and buttons are built in JS, so a Rails test can only grep `landing/flow/flow.js` for those templates.
 
 ## Budget (measured)
 
-- **Bytes:** `flow/flow.js` 93 KB, `flow/flow.css` 33 KB, `flow/head.js` 1.8 KB gzipped (426 KB raw together:
-  287,830 + 134,383 + 4,218 B, of which the three PORT NOTES comments are 19.6 KB). Images at load: 74 requests / 265 KB
+- **Bytes:** `flow/flow.js` 94 KB, `flow/flow.css` 33 KB, `flow/head.js` 1.8 KB gzipped (429 KB raw together:
+  290,202 + 134,383 + 4,218 B, of which the three PORT NOTES comments are 21.3 KB). Images at load: 74 requests / 265 KB
   at 1440x900, 58 / 257 KB at 390x844 (all three stages mount at load, wherever the section is; upstream's
   behaviour). Fonts at load: 6 faces at every size, the theme faces only once Build comes on screen (above).
   index.html went from 9.0 to 8.1 KB gzipped, main.js from 19.0 to 11.4 KB raw, styles.css from 24.4 to 13.5 KB raw.
