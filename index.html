@@ -14,6 +14,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="hero/hero.css">
+  <link rel="modulepreload" href="hero/vendor/three.module.min.js" fetchpriority="low">
+  <script src="hero/intro.js"></script>
 </head>
 <body>
 
@@ -33,24 +36,51 @@
 
   <!-- HERO -->
   <section class="hero" aria-labelledby="hero-title">
+    <canvas class="st" id="st" aria-hidden="true"></canvas>
+    <div class="rm" id="fl" aria-hidden="true"></div>
     <div class="container hero__inner">
-      <h1 class="hero__title" id="hero-title">Sample Stores for<br>Building With AI</h1>
-      <p class="hero__sub">No sign-up, no catalog to fill, no keys to manage. Point your AI agent at one of 100+ free<br class="br-lg"> sample stores and start building on real products, collections and carts.</p>
+      <div class="hero__copy">
+        <img class="hscrim" src="hero/scrim.svg" width="1155" height="919" alt="">
+        <h1 class="hero__title" id="hero-title"><span>Sample Stores for</span> <span>Building With AI</span></h1>
+        <p class="hero__sub">No sign-up, no catalog to fill, no keys to manage. Point your AI agent at one of 100+ free<br class="br-lg"> sample stores and start building on real products, collections and carts.</p>
 
-      <div class="tabs" role="tablist" aria-label="How to start" aria-orientation="horizontal" data-tabs="snippet">
-        <button class="tab" role="tab" type="button" id="tab-hero-prompt" aria-selected="true" aria-controls="well-hero" data-tab="prompt">Prompt</button>
-        <button class="tab" role="tab" type="button" id="tab-hero-cli" aria-selected="false" tabindex="-1" aria-controls="well-hero" data-tab="cli">CLI</button>
-        <button class="tab" role="tab" type="button" id="tab-hero-skill" aria-selected="false" tabindex="-1" aria-controls="well-hero" data-tab="skill">Skill</button>
-      </div>
-      <div class="well" id="well-hero" role="tabpanel" aria-labelledby="tab-hero-prompt" data-well>
-        <pre class="well__code" data-snippet>Build me a storefront from a mock.shop store.
+        <div class="tabs" role="tablist" aria-label="How to start" aria-orientation="horizontal" data-tabs="snippet">
+          <button class="tab" role="tab" type="button" id="tab-hero-prompt" aria-selected="true" aria-controls="well-hero" data-tab="prompt">Prompt</button>
+          <button class="tab" role="tab" type="button" id="tab-hero-cli" aria-selected="false" tabindex="-1" aria-controls="well-hero" data-tab="cli">CLI</button>
+          <button class="tab" role="tab" type="button" id="tab-hero-skill" aria-selected="false" tabindex="-1" aria-controls="well-hero" data-tab="skill">Skill</button>
+        </div>
+        <div class="well" id="well-hero" role="tabpanel" aria-labelledby="tab-hero-prompt" data-well>
+          <pre class="well__code" data-snippet>Build me a storefront from a mock.shop store.
 Start at https://mock.shop/llms.txt</pre>
-        <button class="copy-btn" type="button" data-copy aria-label="Copy to clipboard">
-          <svg class="icon-copy" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M14 4H10C9.73478 4 9.48043 4.10536 9.29289 4.29289C9.10536 4.48043 9 4.73478 9 5H7C7 4.20435 7.31607 3.44129 7.87868 2.87868C8.44129 2.31607 9.20435 2 10 2H14C14.7956 2 15.5587 2.31607 16.1213 2.87868C16.6839 3.44129 17 4.20435 17 5V11C17 11.7956 16.6839 12.5587 16.1213 13.1213C15.5587 13.6839 14.7956 14 14 14V12C14.2652 12 14.5196 11.8946 14.7071 11.7071C14.8946 11.5196 15 11.2652 15 11V5C15 4.73478 14.8946 4.48043 14.7071 4.29289C14.5196 4.10536 14.2652 4 14 4ZM6 8H10C10.2652 8 10.5196 8.10536 10.7071 8.29289C10.8946 8.48043 11 8.73478 11 9V15C11 15.2652 10.8946 15.5196 10.7071 15.7071C10.5196 15.8946 10.2652 16 10 16H6C5.73478 16 5.48043 15.8946 5.29289 15.7071C5.10536 15.5196 5 15.2652 5 15V9C5 8.73478 5.10536 8.48043 5.29289 8.29289C5.48043 8.10536 5.73478 8 6 8ZM3 9C3 8.20435 3.31607 7.44129 3.87868 6.87868C4.44129 6.31607 5.20435 6 6 6H10C10.7956 6 11.5587 6.31607 12.1213 6.87868C12.6839 7.44129 13 8.20435 13 9V15C13 15.7956 12.6839 16.5587 12.1213 17.1213C11.5587 17.6839 10.7956 18 10 18H6C5.20435 18 4.44129 17.6839 3.87868 17.1213C3.31607 16.5587 3 15.7956 3 15V9Z" fill="currentColor"/></svg>
-          <svg class="icon-check" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M16.704 5.29a1 1 0 0 1 .006 1.414l-8 8.05a1 1 0 0 1-1.42 0l-4-4.025a1 1 0 1 1 1.42-1.408L8 12.63l7.29-7.334a1 1 0 0 1 1.414-.006Z" fill="currentColor"/></svg>
-          <span class="copy-btn__label" data-copy-label>Copy</span>
-        </button>
-        <span class="visually-hidden" role="status" aria-live="polite" data-copy-status></span>
+          <pre class="well__code well__ghost" aria-hidden="true">Build me a storefront from a mock.shop store.
+Start at https://mock.shop/llms.txt</pre>
+          <pre class="well__code well__ghost" aria-hidden="true">npm i -g @shopify/cli &amp;&amp; shopify store create preview</pre>
+          <pre class="well__code well__ghost" aria-hidden="true">npx skills add Shopify/shopify-ai-toolkit</pre>
+          <svg class="hbeam" aria-hidden="true" focusable="false">
+            <filter id="hbeam-g" x="-5%" y="-40%" width="110%" height="180%"><feGaussianBlur in="SourceGraphic" stdDeviation="2.4"/><feComponentTransfer result="w"><feFuncA type="linear" slope="2.4"/></feComponentTransfer><feMerge><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <g filter="url(#hbeam-g)">
+              <rect class="hb-t" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 3.68 20.32 26" opacity="0.073"/>
+              <rect class="hb-t" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 8.09 15.91 26" opacity="0.08"/>
+              <rect class="hb-t" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 11.17 12.83 26" opacity="0.088"/>
+              <rect class="hb-t" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 13.7 10.3 26" opacity="0.099"/>
+              <rect class="hb-t" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 15.95 8.05 26" opacity="0.111"/>
+              <rect class="hb-t" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 17.97 6.03 26" opacity="0.126"/>
+              <rect class="hb-t" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 19.82 4.18 26" opacity="0.146"/>
+              <rect class="hb-t" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 21.57 2.43 26" opacity="0.176"/>
+              <rect class="hb-t" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 23.21 0.79 26" opacity="0.22"/>
+              <rect class="hb-w" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 18.6 5.4 26"/>
+              <rect class="hb-w" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 20.7 3.3 26"/>
+              <rect class="hb-w" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 22.2 1.8 26"/>
+              <rect class="hb-w" width="100%" height="100%" rx="9.5" pathLength="100" stroke-dasharray="0 23.25 0.75 26"/>
+            </g>
+          </svg>
+          <button class="copy-btn" type="button" data-copy aria-label="Copy to clipboard">
+            <svg class="icon-copy" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M14 4H10C9.73478 4 9.48043 4.10536 9.29289 4.29289C9.10536 4.48043 9 4.73478 9 5H7C7 4.20435 7.31607 3.44129 7.87868 2.87868C8.44129 2.31607 9.20435 2 10 2H14C14.7956 2 15.5587 2.31607 16.1213 2.87868C16.6839 3.44129 17 4.20435 17 5V11C17 11.7956 16.6839 12.5587 16.1213 13.1213C15.5587 13.6839 14.7956 14 14 14V12C14.2652 12 14.5196 11.8946 14.7071 11.7071C14.8946 11.5196 15 11.2652 15 11V5C15 4.73478 14.8946 4.48043 14.7071 4.29289C14.5196 4.10536 14.2652 4 14 4ZM6 8H10C10.2652 8 10.5196 8.10536 10.7071 8.29289C10.8946 8.48043 11 8.73478 11 9V15C11 15.2652 10.8946 15.5196 10.7071 15.7071C10.5196 15.8946 10.2652 16 10 16H6C5.73478 16 5.48043 15.8946 5.29289 15.7071C5.10536 15.5196 5 15.2652 5 15V9C5 8.73478 5.10536 8.48043 5.29289 8.29289C5.48043 8.10536 5.73478 8 6 8ZM3 9C3 8.20435 3.31607 7.44129 3.87868 6.87868C4.44129 6.31607 5.20435 6 6 6H10C10.7956 6 11.5587 6.31607 12.1213 6.87868C12.6839 7.44129 13 8.20435 13 9V15C13 15.7956 12.6839 16.5587 12.1213 17.1213C11.5587 17.6839 10.7956 18 10 18H6C5.20435 18 4.44129 17.6839 3.87868 17.1213C3.31607 16.5587 3 15.7956 3 15V9Z" fill="currentColor"/></svg>
+            <svg class="icon-check" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M16.704 5.29a1 1 0 0 1 .006 1.414l-8 8.05a1 1 0 0 1-1.42 0l-4-4.025a1 1 0 1 1 1.42-1.408L8 12.63l7.29-7.334a1 1 0 0 1 1.414-.006Z" fill="currentColor"/></svg>
+            <span class="copy-btn__label" data-copy-label>Copy</span>
+          </button>
+          <span class="visually-hidden" role="status" aria-live="polite" data-copy-status></span>
+        </div>
       </div>
     </div>
   </section>
@@ -348,5 +378,6 @@ Start at https://mock.shop/llms.txt</pre>
 </svg>
 
 <script src="main.js"></script>
+<script type="module" src="hero/field.js" data-hero-field async fetchpriority="low"></script>
 </body>
 </html>

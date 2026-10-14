@@ -1,0 +1,229 @@
+/* hero/hero.css: the animated hero's layers, on top of styles.css (index.html links it right after it).
+   Hand-ported from Kyu Kim's hero lab: richardli-design/mock-shop-lp, project/hero-stage/hero-lab/index.html @
+   1914c8e (R19), whose <style> is lines 31-644. Every block below cites the upstream lines it comes from ("K124-125");
+   "PORT" marks what is not upstream's. Only the field, intro, headline-letter, beam, scrim, wash and hit-box rules
+   are ported, never the lab's tag rules, :root tokens, font-face rules, header, page-level .hero box or copy type:
+   the page's own layout and type stay as they are.
+
+   PORT NOTES (deviations from upstream)
+   - Scope. Every rule is under .hero or under the hero-only .hero__copy (the CTA has the same .tabs/.well, outside
+     the copy column), with two exceptions: the header pass-through (.hero-on .site-header, outside section.hero; see
+     its block) and the six @keyframes names, which are document-global and upstream's own: hx-in, rm-in, hx-pt,
+     hx-ch, hbeam-run, hbeam-in (the Rails landing CSS must not define the same names; grep it for them). The lab's
+     .copy / .hero-in are .hero__copy / .hero__inner here; its .hg p / .hbar .mtabs / .hbar .hwell are .hero__sub /
+     .tabs / .well.
+   - JS on/off. Everything that paints only for the animation is under html.hero-on, which hero/intro.js sets before
+     first paint. It comes off again when the field cannot run: hero/intro.js's error listener if hero/field.js
+     itself fails (404, CSP, CORS, a parse error, a throw before it boots), hero/field.js if three.js cannot load
+     or the page has no hero markup. Without it the hero is exactly the static picture it was: background image, no
+     washes, no scrim, no beam, the field's two layers out of the render tree, the copy where it was.
+   - The lab's .hero is its own page (100vh, flex-centred, z-index:1). Here only its stacking is taken, as
+     isolation:isolate (a stacking context without a z-index), and its background without the static image; the
+     page's 790px desktop hero stays. On a phone (<=900px) the lab's box IS taken, under hero-on (see the 900px block).
+   - Tokens: the lab's dark --panel (#13181a; the page's own --panel is #171717 and used below the hero) on the room
+     only, its dark --scrim on the hero; the room's text left-aligned (the page's hero centres its text).
+   - The scrim is the <img class="hscrim"> in the markup (Rails: image_tag), hidden unless hero-on. No CSS url reference in
+     this file (the Rails landing-stylesheet test forbids them).
+   - The beam rides this page's well, which has a real 1px border at radius 10 (the lab's ring is an ::after at radius
+     16): the SVG goes -.5px out to the border's centre line (the markup's rx is 9.5) and sits at z-index:-1 in the
+     isolated well, so it paints over the well's fill and border and under the snippet and the Copy button.
+   - The washes' ellipse sits on the copy's centre, 395px down at >=1024 (as upstream: the page's copy centre is the
+     comp's); the page's 640px tablet hero (901-1023px) gets its own measured centre.
+   - The header lets the pointer through to the products under it (the lab's .site rule, on the page's .site-header).
+   - The entrance's fill-mode is backwards, not both (see the intro block): it ends on the parts' own resting style
+     either way, but a filling part stays composited, which re-rasterised the page's tab strip at its fractional x
+     for good. The price is a one-off ~0.5px settle of the tab strip as its entrance ends (accepted).
+   - The row's will-change:transform (K224-226) is upstream's correctness fix, kept: without it Chrome can drop the
+     layer and the room paints over the copy. It also puts the whole copy on a transparent compositor layer, where
+     Chromium draws text with grayscale antialiasing: on Windows ClearType the settled copy may lose its subpixel
+     antialiasing (unverified; this macOS host antialiases in grayscale everywhere).
+   - Phones (<=639px): the hero well holds its tallest snippet's height, as the lab's .hghost does, with three
+     aria-hidden ghost <pre>s in the markup (see the well block). Products: touch-action pan-y pinch-zoom, where the
+     lab has pan-y, so a pinch that starts on a product still zooms the page.
+*/
+
+/* ---- tokens (K42 --panel, K89 --scrim: the lab's dark-theme values) ---------------------------------------------- */
+.hero{--scrim:rgba(8,11,12,.84)}
+
+/* ---- the hero's box (K108-110: its stacking and its background only; PORT: isolation instead of z-index:1, and the
+   static picture dropped, never fetched, while the field draws the hero) ------------------------------------------- */
+.hero-on .hero{background-image:none;isolation:isolate}
+
+/* ---- the field (K124-125 room; K135-184 cards, faces, badges, hit boxes; K188-189 stream) ------------------------- */
+.hero .rm{position:absolute;left:0;right:0;bottom:0;top:0;
+  z-index:0;overflow:hidden;pointer-events:none}
+/* PORT: the card tokens the lab's sheet gave the whole page, kept to the room */
+.hero .rm{--panel:#13181a;text-align:left}
+.hero .p3{position:absolute;left:0;top:0;width:435px;height:580px;
+  transform-origin:50% 50%;opacity:0;will-change:transform}
+.hero .p3.is-c{width:502px;height:502px}
+.hero .p3-f{position:absolute;inset:0;border-radius:12.7px;overflow:hidden;
+  background:var(--panel);
+  box-shadow:0 23.1px 51.9px -20.8px rgba(0,0,0,.62);
+  transition:box-shadow .3s}
+.hero .p3-f img{display:block;width:100%;height:100%;object-fit:cover}
+.hero .p3.is-3d .p3-f{background:linear-gradient(to bottom,var(--w1) 0%,
+  var(--w2) 60%,var(--t1) 66%,var(--t2) 100%)}
+.hero .p3-g{position:absolute;left:-45px;top:-150px;width:525px;height:740px;
+  pointer-events:none}
+.hero .fl-b,.hero .fl-n{position:absolute;pointer-events:none;font-size:40px;line-height:52px}
+.hero .fl-b{left:26px;top:26px;padding:6px 26px;border-radius:12.7px;font-weight:550;
+  color:#fff;background:rgba(8,11,12,.62)}
+.hero .fl-b[data-k="c"]{background:rgba(118,140,233,.78)}
+.hero .fl-n{left:0;right:0;bottom:0;padding:80px 32px 26px;border-radius:0 0 12.7px 12.7px;
+  color:#fff;font-weight:450;
+  background:linear-gradient(to top,rgba(0,0,0,.62),rgba(0,0,0,0))}
+.hero .fl-n span{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+/* PORT: pan-y pinch-zoom where the lab has pan-y (here and on .p3-h), so a pinch that starts on a product zooms */
+.hero .p3.is-3d{pointer-events:auto;cursor:grab;touch-action:pan-y pinch-zoom}
+.hero .p3.is-3d.drag{cursor:grabbing}
+.hero .p3.is-3d.hov .p3-f{box-shadow:0 40px 80px -24px rgba(0,0,0,.75)}
+.hero .p3.is-3d.is-bare{pointer-events:none}
+.hero .p3-h{position:absolute;pointer-events:auto;cursor:grab;touch-action:pan-y pinch-zoom;border-radius:48px}
+.hero .p3.drag .p3-h{cursor:grabbing}
+.hero .p3-h.wait{cursor:default}
+.hit .hero .p3-h{outline:4px dashed rgba(118,140,233,.85);outline-offset:-4px}
+.hero .st{position:absolute;left:0;top:0;width:100%;height:100%;
+  z-index:0;pointer-events:none}
+/* PORT: the field's two layers only under hero-on, like the beam and the scrim. Without it they are empty (JS off, no
+   modules, file://), or the page has given up on the field (hero/intro.js's error listener, hero/field.js's guards):
+   then a stream or a room that was already drawing must not paint over the static picture, and #fl out of the
+   render tree also makes the field's IntersectionObserver stop its loop. */
+html:not(.hero-on) .hero .st,html:not(.hero-on) .hero .rm{display:none}
+
+/* ---- the copy's row and column (K192-193 pointer; K224-226 the row's position, z-index and will-change only, a
+   correctness fix upstream: without it Chrome can drop the layer and the room paints over the copy; K229-230 the
+   column's position and 800 cap only, a plain block, so the page's own margins and type stay) -------------------- */
+.hero-on .hero__inner{position:relative;z-index:2;pointer-events:none;will-change:transform}
+.hero__copy{position:relative;max-width:800px;margin-inline:auto;pointer-events:auto}
+/* (K255) the headline's two lines, two block spans in the markup where the <br> was */
+.hero__title > span{display:block}
+
+/* ---- the washes over the room (K130-131 the phone's fade band under the header, shown at <=900; K202-208 the
+   copy's ellipse and the corner vignette) --------------------------------------------------------------------------- */
+.hero-on .hero::before{content:"";position:absolute;left:0;right:0;top:72px;height:56px;z-index:1;
+  display:none;pointer-events:none;will-change:transform;background:linear-gradient(var(--bg),rgba(8,11,12,0))}
+.hero-on .hero::after{content:"";position:absolute;inset:0;z-index:1;
+  pointer-events:none;will-change:transform;background:
+    radial-gradient(330px 205px at 50% 395px,
+                    var(--bg) 0%,rgba(8,11,12,.97) 45%,rgba(8,11,12,.9) 65%,
+                    rgba(8,11,12,.62) 85%,rgba(8,11,12,.26) 100%,
+                    rgba(8,11,12,.06) 112%,transparent 122%),
+    radial-gradient(118% 88% at 50% 50%,transparent 66%,var(--bg) 128%)}
+
+/* ---- the scrim behind the copy (K264-265; PORT: hidden unless hero-on, the static picture has its own dimming) ---- */
+.hero .hscrim{position:absolute;left:50%;top:50%;z-index:-1;width:1155px;height:919px;
+  max-width:none;pointer-events:none;transform:translate(-50%,-50%) translate(-1.5px,-61.5px)}
+html:not(.hero-on) .hero .hscrim{display:none}
+
+/* ---- the intro: the copy comes out of the vanishing point (K267-270 keyframes; K290-297 the entrance, its parts and
+   their delays). PORT: fill-mode backwards where the lab has both (here and in hx-pt below). Each part's last keyframe
+   is its own resting style, so nothing on screen changes, but a part whose animation keeps filling stays on its own
+   compositor layer, and the page's tab strip sits on a fractional x (616.422px at 1440; the lab's on a whole 616), so
+   its labels came out re-rasterised (755px off by up to 124/255, geometry unchanged). Ended, the parts paint into the
+   copy's row again, which the row's own will-change keeps above the room (K214-223). The one visible trace: as the
+   tab strip's entrance ends (about 1.36s after .go) its layer goes and the strip is drawn at its true fractional x, a
+   ~0.5px step to the right (the lab's tabs, on a whole pixel, have none). Accepted over a settled strip that differs
+   from the page's for good. --------------------------------------------------------------------------------------- */
+@keyframes hx-in{
+  from{opacity:0;filter:blur(8px);transform:scale(.9)}
+  to  {opacity:1;filter:none;transform:none}}
+@keyframes rm-in{from{opacity:0} to{opacity:1}}
+.intro :is(.hero__copy h1 > span,.hero__copy .hero__sub,.hero__copy .tabs,.hero__copy .well){
+  transform-origin:50% var(--hv,50%);
+  animation:hx-in 1.1s cubic-bezier(.16,1,.3,1) var(--hd,0s) backwards paused}
+.intro.go :is(.hero__copy h1 > span,.hero__copy .hero__sub,.hero__copy .tabs,.hero__copy .well){animation-play-state:running}
+.hero__copy h1 > span + span{--hd:.08s}
+.hero__copy .hero__sub{--hd:.16s}
+.hero__copy .tabs{--hd:.26s}
+.hero__copy .well{--hd:.34s}
+
+/* ---- the headline in a sequence out of the particles (K309-315), and the room's fade-in (K316) ------------------- */
+@keyframes hx-pt{from{opacity:0;filter:blur(3px);transform:scale(.97)} to{opacity:1;filter:none;transform:none}}
+.intro.pt .hero__copy h1 > span{animation:hx-pt .5s cubic-bezier(.33,0,.67,1) var(--hd,0s) backwards paused;--hd:.6s}
+.intro.pt .hero__copy h1 > span + span{--hd:.66s}
+@keyframes hx-ch{from{opacity:0;filter:blur(4px)} to{opacity:1;filter:none}}
+.intro.pt .hero__copy h1.sq > span{animation:none}
+.intro.pt .hero__copy h1.sq .hl{animation:hx-ch .5s cubic-bezier(.33,0,.67,1) calc(.42s + .6s * var(--q,0)) both paused}
+.intro.pt.go .hero__copy h1.sq .hl{animation-play-state:running}
+.intro .hero .rm{animation:rm-in .6s ease-out both .05s}
+
+/* ---- the light round the hero well's ring (K519-530; PORT: its colours on the SVG, not the well; the geometry for
+   this page's bordered well; isolation on the well so z-index:-1 lands inside it; hidden unless hero-on) ----------- */
+.hero .hbeam{--beam:#00f4b9;--beam-hot:#e6fff7}
+[data-glow="blue"] .hero .hbeam{--beam:#4ca7ff;--beam-hot:#eaf5ff}
+.hero-on .hero .well{isolation:isolate}
+.hero .hbeam{position:absolute;left:-.5px;top:-.5px;z-index:-1;
+  width:calc(100% + 1px);height:calc(100% + 1px);overflow:visible;pointer-events:none;
+  mix-blend-mode:screen;opacity:0;animation:hbeam-in 1.2s ease-out 1s forwards}
+.intro:not(.go) .hero .hbeam{animation-play-state:paused}
+.hero .hbeam g{animation:hbeam-run 2.2s cubic-bezier(.4,.2,.6,.8) infinite}
+.hero .hbeam.hb-off g{animation-play-state:paused}
+.hero .hbeam rect{fill:none;stroke:var(--beam);stroke-width:.75px}
+.hero .hbeam .hb-w{stroke:var(--beam-hot);opacity:.05}
+@keyframes hbeam-run{from{stroke-dashoffset:-19}to{stroke-dashoffset:-69}}
+@keyframes hbeam-in{to{opacity:1}}
+html:not(.hero-on) .hero .hbeam{display:none}
+
+/* ---- the hero well at its tallest snippet on a phone (PORT; the lab's .hghost, K386-392 and K414: one grid cell
+   holding the live line and a hidden copy of the prompt's, so that the active tab cannot change the box and move the
+   copy). Below 640px the page's well is a column whose snippet wraps, so Prompt is 20-40px taller than CLI or Skill,
+   and the phone box (below) centres the copy: a tab switch moved the headline, and the tab under the finger, by half
+   that, and the field re-measured its lanes (the near products jumped ~13px in a frame). Under hero-on at <=639px the
+   well is one grid cell holding the live snippet and three aria-hidden ghost <pre>s with main.js's three texts
+   (index.html: class well__ghost, no data-snippet, after the live one), so it is as tall as the tallest of them; the
+   Copy button keeps its row below. The ghosts are display:none everywhere else (JS off, 640px and up), so those
+   layouts are as they were. -------------------------------------------------------------------------------------- */
+.hero .well__ghost{display:none}
+@media (max-width:639px){
+  .hero-on .hero .well{display:grid;grid-template-columns:minmax(0,1fr)}
+  .hero-on .hero .well > .well__code{grid-area:1/1}
+  .hero-on .hero .well__ghost{display:block;visibility:hidden;pointer-events:none}
+  .hero-on .hero .well > .copy-btn{justify-self:end}
+}
+
+/* ---- the header lets the pointer through to the products under it; only its links take it (K326-332's behaviour,
+   on the page's own header; PORT: under hero-on) ------------------------------------------------------------------- */
+.hero-on .site-header{pointer-events:none}
+.hero-on .site-header a{pointer-events:auto}
+
+/* ---- motion off (K585-589): the intro is not set up then (hero/intro.js); these are for a preference that changes
+   after load. The page's own rule (styles.css) already stops every animation. ------------------------------------- */
+@media (prefers-reduced-motion:reduce){
+  .intro :is(.hero__copy h1 span,.hero__copy .hero__sub,.hero__copy .tabs,.hero__copy .well),.intro .hero .rm{
+    animation-duration:.001ms!important;animation-delay:0s!important}
+  .hero .hbeam{display:none}
+}
+
+/* ---- the tablet band (PORT): from 901 to 1023px the field runs its desktop layout in the page's 640px tablet hero,
+   whose copy centre is 310px down (150px of padding + half the 320px copy, measured at 901-1023), not 395px ---------- */
+@media (min-width:901px) and (max-width:1023px){
+  .hero-on .hero::after{background:
+    radial-gradient(330px 205px at 50% 310px,
+                    var(--bg) 0%,rgba(8,11,12,.97) 45%,rgba(8,11,12,.9) 65%,
+                    rgba(8,11,12,.62) 85%,rgba(8,11,12,.26) 100%,
+                    rgba(8,11,12,.06) 112%,transparent 122%),
+    radial-gradient(118% 88% at 50% 50%,transparent 66%,var(--bg) 128%)}
+}
+
+/* ---- the phone (<=900px, the field's own breakpoint) -------------------------------------------------------------- */
+@media (max-width:900px){
+  /* K598-600: the room and the stream start under the header's 72px, with the fade band over their top edge */
+  .hero .rm{top:72px}
+  .hero .st{top:72px;height:calc(100% - 72px)}
+  .hero-on .hero::before{display:block}
+  /* K617: the ellipse shrinks with the copy */
+  .hero .hscrim{transform:translate(-50%,-50%) translateY(-30px) scale(.62)}
+  /* K631-634: the phone's copy is full width, so its scrim is a band */
+  .hero-on .hero::after{background:
+    radial-gradient(80% 25% at 50% 50%,var(--scrim) 0%,var(--scrim) 62%,
+                    transparent 100%),
+    radial-gradient(130% 90% at 50% 50%,transparent 62%,var(--bg) 120%)}
+  /* PORT (a deliberate change to the page's phone layout, JS on only): the lab's phone hero box (K108-110 flex
+     centring + K625-626), so the hero is one screen tall and the products have their bands above the headline and
+     below the well; the page's own phone hero (646px at 390x844) leaves them none and they retire as soon as they
+     arrive. The content below the hero moves down by the difference. The row keeps the page's side margins
+     (K626's 20px side padding is left out: the page's .container already gives them). */
+  .hero-on .hero{height:auto;min-height:100vh;min-height:100svh;padding:96px 0 48px;display:flex;align-items:center}
+  .hero-on .hero__inner{padding:24px 0 40px}
+}
